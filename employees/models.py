@@ -18,6 +18,12 @@ class Employee(models.Model):
         on_delete=models.CASCADE
     )
 
+    profile_image = models.ImageField(
+        upload_to='employees/',
+        blank=True,
+        null=True
+    )
+
     status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
