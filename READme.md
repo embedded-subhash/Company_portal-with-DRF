@@ -1,74 +1,90 @@
 # Django HR Management System
 
-A professional Employee Management Portal built using Django and PostgreSQL. This application provides employee registration, profile management, CRUD operations, form validation, image upload support, search, filtering, and pagination.
+## Overview
+
+Django HR Management System is a professional Employee Management Portal developed using Django and PostgreSQL. The application provides role-based access control, employee management, department management, authentication, authorization, dashboard analytics, password management, and profile management.
+
+---
 
 ## Features
+
+### Authentication & Authorization
+
+* Custom User Model
+* Email-based Authentication
+* User Registration
+* Login & Logout
+* Role-Based Access Control (RBAC)
+* Dynamic Permission Assignment
+
+### User Roles
+
+* Admin
+* HR
+* Manager
+* Employee
 
 ### Employee Management
 
 * Create Employee
-* View Employee List
-* View Employee Details
-* Update Employee Information
-* Delete Employee Records
+* View Employee
+* Update Employee
+* Delete Employee
+* Search Employees
+* Employee Status Management
+* Pagination Support
 
 ### Department Management
 
-* Department Creation
-* Department Assignment to Employees
+* Create Department
+* Update Department
+* Delete Department
+* Department Listing
 
-### Form Validation
+### Dashboards
 
-* Employee ID Validation (EMP001 Format)
-* Unique Employee ID
-* Unique Email Validation
-* Phone Number Validation
-* Salary Range Validation
-* Joining Date Validation
+#### Admin Dashboard
 
-### Profile Image Upload
+* Total Users
+* Total Employees
+* Total Departments
+* Active Users
 
-* Upload Employee Profile Image
-* Display Employee Image
-* Update Employee Image
+#### HR Dashboard
 
-### Search and Filtering
+* Employee Statistics
+* Active Employees
+* Inactive Employees
 
-* Search by Employee ID
-* Search by Name
-* Search by Email
-* Filter by Department
-* Filter by Status
+#### Employee Dashboard
 
-### Pagination
+* Personal Profile
+* Employee Information
+* Department Details
 
-* 10 Employees Per Page
+### Password Management
 
-### Django Generic Views
+* Change Password
+* Forgot Password
+* Password Reset Workflow
 
-* CreateView
-* ListView
-* DetailView
-* UpdateView
-* DeleteView
+### Profile Management
 
-### Messages Framework
-
-* Success Messages
-* Error Messages
-* Validation Messages
+* Profile Image Upload
+* Update Personal Details
+* Update Contact Information
 
 ---
 
 ## Technology Stack
 
-* Python 3.14
-* Django 6
+* Python
+* Django
 * PostgreSQL
-* HTML
-* CSS
-* Bootstrap (Optional)
-* Pillow
+* HTML5
+* CSS3
+* Bootstrap
+* Git & GitHub
 
 ---
 
@@ -76,31 +92,17 @@ A professional Employee Management Portal built using Django and PostgreSQL. Thi
 
 company_portal/
 
-├── company_portal/
+├── accounts/
 
 ├── employees/
 
-│   ├── forms.py
-
-│   ├── models.py
-
-│   ├── views.py
-
-│   ├── urls.py
-
-│   └── templates/
-
-│       └── employees/
-
 ├── departments/
-
-│   ├── models.py
-
-│   └── admin.py
 
 ├── media/
 
-│   └── employees/
+├── templates/
+
+├── static/
 
 ├── manage.py
 
@@ -112,159 +114,57 @@ company_portal/
 
 ### Clone Repository
 
-```bash
-git clone https://github.com/embedded-subhash/django-hr-management-system.git
+git clone https://github.com/your-username/django-hr-management-system.git
 
 cd django-hr-management-system
-```
 
 ### Create Virtual Environment
 
-```bash
 python -m venv .venv
-```
 
-### Activate Virtual Environment
+### Activate Environment
 
 Windows
 
-```bash
 .venv\Scripts\activate
-```
-
-Linux/Mac
-
-```bash
-source .venv/bin/activate
-```
 
 ### Install Dependencies
 
-```bash
 pip install -r requirements.txt
-```
 
----
+### Database Migration
 
-## PostgreSQL Configuration
-
-Create Database
-
-```sql
-CREATE DATABASE company_db;
-```
-
-Update settings.py
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'company_db',
-        'USER': 'postgres',
-        'PASSWORD': 'your_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
-
----
-
-## Run Migrations
-
-```bash
 python manage.py makemigrations
 
 python manage.py migrate
-```
 
----
+### Create Superuser
 
-## Create Superuser
-
-```bash
 python manage.py createsuperuser
-```
 
----
+### Run Server
 
-## Run Server
-
-```bash
 python manage.py runserver
-```
-
-Open:
-
-```text
-http://127.0.0.1:8000/
-```
-
-Employee Module:
-
-```text
-http://127.0.0.1:8000/employees/
-```
-
-Admin Panel:
-
-```text
-http://127.0.0.1:8000/admin/
-```
-
----
-
-## Employee CRUD URLs
-
-| Function        | URL                     |
-| --------------- | ----------------------- |
-| Employee List   | /employees/             |
-| Create Employee | /employees/create/      |
-| Employee Detail | /employees/<id>/        |
-| Update Employee | /employees/update/<id>/ |
-| Delete Employee | /employees/delete/<id>/ |
-
----
-
-## Screenshots
-
-Include:
-
-* Employee List
-* Create Employee
-* Employee Detail
-* Update Employee
-* Delete Employee
-* Validation Errors
-* Search and Filter
-* Profile Image Upload
 
 ---
 
 ## Git Workflow
 
-```bash
 git checkout development
 
 git pull origin development
 
-git checkout -b feature/employee-crud
-```
+git checkout -b feature/authentication-rbac
 
-Commit Messages
+---
 
-```bash
-feat: implement employee forms
+## Screenshots
 
-feat: implement CRUD operations
-
-feat: add profile image upload
-
-feat: implement search and filtering
-
-feat: add pagination support
-```
+* Registration Page
+* Login Page
+* Dashboard
+* RBAC Implementation
+* Admin Panel
 
 ---
 
@@ -272,21 +172,10 @@ feat: add pagination support
 
 Subhash
 
-Software Engineer
-
-Django Backend Developer Trainee
+Software Engineer | Embedded Systems & Django Developer
 
 ---
 
-## Project Status
+## License
 
-Completed
-
-* Employee Registration
-* CRUD Operations
-* PostgreSQL Integration
-* Form Validation
-* Django Generic Views
-* Profile Image Upload
-* Pagination
-* Messages Framework
+This project is developed for educational and professional learning purposes.
