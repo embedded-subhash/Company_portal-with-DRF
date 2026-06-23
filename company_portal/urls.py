@@ -9,7 +9,7 @@ urlpatterns = [
     path(
         '',
         RedirectView.as_view(
-            url='/employees/',
+            url='/accounts/login/',
             permanent=False
         ),
         name='home'
@@ -28,6 +28,11 @@ urlpatterns = [
     path(
         'employees/',
         include('employees.urls')
+    ),
+
+    path(
+       'departments/',
+        include('departments.urls')
     ),
 ]
 
