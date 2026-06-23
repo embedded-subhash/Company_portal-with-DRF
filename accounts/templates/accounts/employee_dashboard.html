@@ -1,0 +1,8 @@
+<h1>Employee Dashboard</h1>
+
+<h3>Name : {{ user.first_name }} {{ user.last_name }}</h3>
+<h3>Email : {{ user.email }}</h3>
+<h3>Employee ID : {{ user.employee_id }}</h3>
+<h3>Role : {{ user.role }}</h3>
+
+<a href="{% url 'logout' %}">Logout</a>

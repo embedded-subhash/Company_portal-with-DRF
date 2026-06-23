@@ -6,30 +6,36 @@ from django.conf.urls.static import static
 
 urlpatterns = [
 
-    # Home Page -> Employee List
     path(
         '',
         RedirectView.as_view(
-            url='/employees/',
+            url='/accounts/login/',
             permanent=False
         ),
         name='home'
     ),
 
-    # Admin
     path(
         'admin/',
         admin.site.urls
     ),
 
-    # Employees App
+    path(
+        'accounts/',
+        include('accounts.urls')
+    ),
+
     path(
         'employees/',
         include('employees.urls')
     ),
+
+    path(
+       'departments/',
+        include('departments.urls')
+    ),
 ]
 
-# Media Files
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL,
