@@ -1,12 +1,9 @@
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.shortcuts import redirect
 
-from django.contrib.auth.mixins import (
-    LoginRequiredMixin,
-    PermissionRequiredMixin
-)
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import (
     CreateView,
     ListView,
@@ -19,13 +16,39 @@ from .models import Employee
 from .forms import EmployeeForm
 
 
+class EmployeePermissionMixin(LoginRequiredMixin):
+
+    required_permission = None
+
+    def dispatch(self, request, *args, **kwargs):
+
+        if request.user.role == 'ADMIN':
+            return super().dispatch(request, *args, **kwargs)
+
+        if self.required_permission:
+
+            if not request.user.has_perm(
+                self.required_permission
+            ):
+                messages.error(
+                    request,
+                    "You do not have permission."
+                )
+                return redirect('dashboard')
+
+        return super().dispatch(
+            request,
+            *args,
+            **kwargs
+        )
+
+
 class EmployeeCreateView(
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
+    EmployeePermissionMixin,
     CreateView
 ):
 
-    permission_required = 'employees.add_employee'
+    required_permission = 'employees.add_employee'
 
     model = Employee
     form_class = EmployeeForm
@@ -43,12 +66,11 @@ class EmployeeCreateView(
 
 
 class EmployeeListView(
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
+    EmployeePermissionMixin,
     ListView
 ):
 
-    permission_required = 'employees.view_employee'
+    required_permission = 'employees.view_employee'
 
     model = Employee
     template_name = 'employees/list.html'
@@ -64,7 +86,6 @@ class EmployeeListView(
         status = self.request.GET.get('status')
 
         if search:
-
             queryset = queryset.filter(
                 Q(employee_id__icontains=search) |
                 Q(first_name__icontains=search) |
@@ -73,13 +94,11 @@ class EmployeeListView(
             )
 
         if department:
-
             queryset = queryset.filter(
                 department__name=department
             )
 
         if status:
-
             queryset = queryset.filter(
                 status=status
             )
@@ -98,12 +117,11 @@ class EmployeeListView(
 
 
 class EmployeeDetailView(
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
+    EmployeePermissionMixin,
     DetailView
 ):
 
-    permission_required = 'employees.view_employee'
+    required_permission = 'employees.view_employee'
 
     model = Employee
     template_name = 'employees/detail.html'
@@ -111,12 +129,11 @@ class EmployeeDetailView(
 
 
 class EmployeeUpdateView(
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
+    EmployeePermissionMixin,
     UpdateView
 ):
 
-    permission_required = 'employees.change_employee'
+    required_permission = 'employees.change_employee'
 
     model = Employee
     form_class = EmployeeForm
@@ -134,22 +151,25 @@ class EmployeeUpdateView(
 
 
 class EmployeeDeleteView(
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
+    EmployeePermissionMixin,
     DeleteView
 ):
 
-    permission_required = 'employees.delete_employee'
+    required_permission = 'employees.delete_employee'
 
     model = Employee
     template_name = 'employees/delete.html'
     success_url = reverse_lazy('employee_list')
 
-    def form_valid(self, form):
+    def delete(self, request, *args, **kwargs):
 
         messages.success(
-            self.request,
+            request,
             'Employee Deleted Successfully'
         )
 
-        return super().form_valid(form)
+        return super().delete(
+            request,
+            *args,
+            **kwargs
+        )

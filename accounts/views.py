@@ -10,7 +10,7 @@ from employees.models import Employee
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from departments.models import Department
-
+from .forms import ProfileUpdateForm
 def register(request):
 
     if request.method == 'POST':
@@ -151,17 +151,23 @@ def admin_dashboard(request):
 
 @login_required
 @hr_required
+@login_required
+@hr_required
 def hr_dashboard(request):
 
     context = {
         'total_employees': Employee.objects.count(),
+
         'active_employees': Employee.objects.filter(
-            status='Active'
+            status=True
         ).count(),
+
         'inactive_employees': Employee.objects.filter(
-            status='Inactive'
+            status=False
         ).count(),
+
         'total_departments': Department.objects.count(),
+
         'recent_employees': Employee.objects.order_by(
             '-id'
         )[:5]
@@ -174,13 +180,17 @@ def hr_dashboard(request):
     )
 @login_required
 @manager_required
+@login_required
+@manager_required
 def manager_dashboard(request):
 
     context = {
         'total_employees': Employee.objects.count(),
+
         'active_employees': Employee.objects.filter(
-            status='Active'
+            status=True
         ).count(),
+
         'total_departments': Department.objects.count(),
     }
 
@@ -236,6 +246,94 @@ def change_password(request):
     return render(
         request,
         'accounts/change_password.html',
+        {
+            'form': form
+        }
+    )
+@login_required
+def profile(request):
+
+    return render(
+        request,
+        'accounts/profile.html'
+    )
+
+
+@login_required
+def edit_profile(request):
+
+    if request.method == 'POST':
+
+        form = ProfileUpdateForm(
+            request.POST,
+            request.FILES,
+            instance=request.user
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            messages.success(
+                request,
+                'Profile updated successfully.'
+            )
+
+            return redirect('profile')
+
+    else:
+
+        form = ProfileUpdateForm(
+            instance=request.user
+        )
+
+    return render(
+        request,
+        'accounts/edit_profile.html',
+        {
+            'form': form
+        }
+    )
+@login_required
+def profile(request):
+
+    return render(
+        request,
+        'accounts/profile.html'
+    )
+
+
+@login_required
+def edit_profile(request):
+
+    if request.method == 'POST':
+
+        form = ProfileUpdateForm(
+            request.POST,
+            request.FILES,
+            instance=request.user
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            messages.success(
+                request,
+                'Profile Updated Successfully'
+            )
+
+            return redirect('profile')
+
+    else:
+
+        form = ProfileUpdateForm(
+            instance=request.user
+        )
+
+    return render(
+        request,
+        'accounts/edit_profile.html',
         {
             'form': form
         }

@@ -29,8 +29,8 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_active', True)
 
         return self.create_user(
-            email,
-            password,
+            email=email,
+            password=password,
             **extra_fields
         )
 
@@ -73,11 +73,7 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
 
-    REQUIRED_FIELDS = [
-        'employee_id',
-        'phone',
-        'role'
-    ]
+    REQUIRED_FIELDS = []
 
     objects = UserManager()
 
