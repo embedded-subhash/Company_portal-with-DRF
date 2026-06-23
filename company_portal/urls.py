@@ -6,7 +6,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
 
-    # Home Page -> Employee List
     path(
         '',
         RedirectView.as_view(
@@ -16,20 +15,22 @@ urlpatterns = [
         name='home'
     ),
 
-    # Admin
     path(
         'admin/',
         admin.site.urls
     ),
 
-    # Employees App
+    path(
+        'accounts/',
+        include('accounts.urls')
+    ),
+
     path(
         'employees/',
         include('employees.urls')
     ),
 ]
 
-# Media Files
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL,
