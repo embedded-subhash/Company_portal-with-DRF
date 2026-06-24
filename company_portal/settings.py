@@ -42,6 +42,15 @@ INSTALLED_APPS = [
      'employees.apps.EmployeesConfig',
     'departments.apps.DepartmentsConfig',  
     'accounts',
+     # Third Party Apps
+
+    'rest_framework',
+    'django_filters',
+    'drf_yasg',
+
+    # API App
+
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +137,17 @@ AUTH_USER_MODEL = 'accounts.User'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = 'admin@companyportal.com'
+REST_FRAMEWORK = {
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+
+        'rest_framework.authentication.SessionAuthentication',
+
+    ),
+
+    'DEFAULT_PERMISSION_CLASSES': (
+
+        'rest_framework.permissions.AllowAny',
+
+    ),
+}
