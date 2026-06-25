@@ -1,21 +1,16 @@
-# Django HR Management System
+# Django Company Portal with Django REST Framework (DRF)
 
-## Overview
-
-Django HR Management System is a professional Employee Management Portal developed using Django and PostgreSQL. The application provides role-based access control, employee management, department management, authentication, authorization, dashboard analytics, password management, and profile management.
-
----
+A full-stack Company Portal built using Django and Django REST Framework (DRF). The project includes role-based access control, employee and department management, JWT authentication, filtering, pagination, and interactive API documentation using Swagger.
 
 ## Features
 
-### Authentication & Authorization
+### User Management
 
-* Custom User Model
-* Email-based Authentication
-* User Registration
-* Login & Logout
+* Custom User Model (AbstractUser)
+* User Registration and Login
+* Password Change and Reset
+* User Profile Management
 * Role-Based Access Control (RBAC)
-* Dynamic Permission Assignment
 
 ### User Roles
 
@@ -27,11 +22,12 @@ Django HR Management System is a professional Employee Management Portal develop
 ### Employee Management
 
 * Create Employee
-* View Employee
-* Update Employee
+* View Employee Details
+* Update Employee Information
 * Delete Employee
 * Search Employees
-* Employee Status Management
+* Filter Employees
+* Sort Employees
 * Pagination Support
 
 ### Department Management
@@ -39,143 +35,289 @@ Django HR Management System is a professional Employee Management Portal develop
 * Create Department
 * Update Department
 * Delete Department
-* Department Listing
+* View Department Details
 
-### Dashboards
+### REST API Features
 
-#### Admin Dashboard
-
-* Total Users
-* Total Employees
-* Total Departments
-* Active Users
-
-#### HR Dashboard
-
-* Employee Statistics
-* Active Employees
-* Inactive Employees
-
-#### Employee Dashboard
-
-* Personal Profile
-* Employee Information
-* Department Details
-
-### Password Management
-
-* Change Password
-* Forgot Password
-* Password Reset Workflow
-
-### Profile Management
-
-* Profile Image Upload
-* Update Personal Details
-* Update Contact Information
+* Django REST Framework (DRF)
+* Function-Based APIs
+* APIView Implementation
+* Generic Views
+* ModelViewSets
+* Routers
+* JWT Authentication
+* Custom Permissions
+* Filtering and Searching
+* Pagination
+* Swagger Documentation
+* ReDoc Documentation
 
 ---
 
 ## Technology Stack
 
+### Backend
+
 * Python
 * Django
+* Django REST Framework (DRF)
 * PostgreSQL
-* HTML5
-* CSS3
-* Bootstrap
-* Git & GitHub
+
+### Authentication
+
+* Simple JWT
+
+### API Documentation
+
+* drf-yasg (Swagger & ReDoc)
+
+### Filtering
+
+* django-filter
+
+### Version Control
+
+* Git
+* GitHub
 
 ---
 
 ## Project Structure
 
+```text
 company_portal/
-
+│
 ├── accounts/
-
+│   ├── models.py
+│   ├── views.py
+│   ├── forms.py
+│   └── urls.py
+│
 ├── employees/
-
+│   ├── models.py
+│   ├── views.py
+│   ├── forms.py
+│   └── urls.py
+│
 ├── departments/
-
-├── media/
-
+│   ├── models.py
+│   ├── views.py
+│   └── urls.py
+│
+├── api/
+│   ├── serializers.py
+│   ├── permissions.py
+│   ├── pagination.py
+│   ├── filters.py
+│   ├── views.py
+│   └── urls.py
+│
 ├── templates/
-
+├── media/
 ├── static/
-
+│
 ├── manage.py
-
 └── requirements.txt
+```
 
 ---
 
 ## Installation
 
-### Clone Repository
+Clone the repository:
 
-git clone https://github.com/your-username/django-hr-management-system.git
+```bash
+git clone https://github.com/embedded-subhash/django-company-portal.git
+```
 
-cd django-hr-management-system
+Move into the project directory:
 
-### Create Virtual Environment
+```bash
+cd django-company-portal
+```
 
+Create a virtual environment:
+
+```bash
 python -m venv .venv
+```
 
-### Activate Environment
+Activate the virtual environment:
 
-Windows
+Windows:
 
+```bash
 .venv\Scripts\activate
+```
 
-### Install Dependencies
+Install dependencies:
 
+```bash
 pip install -r requirements.txt
+```
 
-### Database Migration
+Apply migrations:
 
-python manage.py makemigrations
-
+```bash
 python manage.py migrate
+```
 
-### Create Superuser
+Create a superuser:
 
+```bash
 python manage.py createsuperuser
+```
 
-### Run Server
+Run the development server:
 
+```bash
 python manage.py runserver
+```
 
 ---
 
-## Git Workflow
+## User Roles and Permissions
 
-git checkout development
-
-git pull origin development
-
-git checkout -b feature/authentication-rbac
+| Role     | Permissions                 |
+| -------- | --------------------------- |
+| Admin    | Full Access                 |
+| HR       | Create and Update Employees |
+| Manager  | View Team Information       |
+| Employee | View Own Profile            |
 
 ---
 
-## Screenshots
+## REST API Endpoints
 
-* Registration Page
-* Login Page
-* Dashboard
-* RBAC Implementation
-* Admin Panel
+### Authentication
+
+| Method | Endpoint              | Description          |
+| ------ | --------------------- | -------------------- |
+| POST   | `/api/token/`         | Generate JWT Token   |
+| POST   | `/api/token/refresh/` | Refresh Access Token |
+
+### Employee APIs
+
+| Method | Endpoint               | Description      |
+| ------ | ---------------------- | ---------------- |
+| GET    | `/api/employees/`      | Employee List    |
+| POST   | `/api/employees/`      | Create Employee  |
+| GET    | `/api/employees/{id}/` | Employee Details |
+| PUT    | `/api/employees/{id}/` | Update Employee  |
+| DELETE | `/api/employees/{id}/` | Delete Employee  |
+
+### Department APIs
+
+| Method | Endpoint                 | Description        |
+| ------ | ------------------------ | ------------------ |
+| GET    | `/api/departments/`      | Department List    |
+| POST   | `/api/departments/`      | Create Department  |
+| GET    | `/api/departments/{id}/` | Department Details |
+| PUT    | `/api/departments/{id}/` | Update Department  |
+| DELETE | `/api/departments/{id}/` | Delete Department  |
+
+---
+
+## Search, Filter and Ordering
+
+Search:
+
+```text
+/api/employees/?search=subhash
+```
+
+Filter by Department:
+
+```text
+/api/employees/?department=1
+```
+
+Filter by Status:
+
+```text
+/api/employees/?status=Active
+```
+
+Order by Salary:
+
+```text
+/api/employees/?ordering=salary
+```
+
+Order by Highest Salary:
+
+```text
+/api/employees/?ordering=-salary
+```
+
+---
+
+## Pagination
+
+Default page size:
+
+```text
+10 records per page
+```
+
+Example:
+
+```text
+/api/employees/?page=2
+```
+
+---
+
+## API Documentation
+
+Swagger UI:
+
+```text
+http://127.0.0.1:8000/swagger/
+```
+
+ReDoc:
+
+```text
+http://127.0.0.1:8000/redoc/
+```
+
+---
+
+## Security Features
+
+* Custom User Model
+* JWT Authentication
+* Role-Based Access Control (RBAC)
+* Protected APIs
+* Password Reset Functionality
+* User Profile Management
+
+---
+
+## Future Enhancements
+
+* Attendance Management System
+* Leave Management Module
+* Payroll System
+* Email Notifications
+* Docker Deployment
+* CI/CD Pipeline
+* Unit Testing
+* Cloud Deployment (AWS/Azure)
 
 ---
 
 ## Author
 
-Subhash
+**Subhash**
 
-Software Engineer | Embedded Systems & Django Developer
+Software Engineer | Python & Embedded Systems Developer
+
+GitHub: https://github.com/embedded-subhash
 
 ---
 
 ## License
 
-This project is developed for educational and professional learning purposes.
+This project is developed for learning, portfolio building, and professional development purposes.
