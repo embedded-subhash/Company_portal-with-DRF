@@ -2,11 +2,11 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
     TokenRefreshView
 )
 
 from .views import (
+    EmailTokenObtainPairView,
     EmployeeViewSet,
     DepartmentViewSet,
     UserViewSet
@@ -43,7 +43,7 @@ urlpatterns = [
 
     path(
         'token/',
-        TokenObtainPairView.as_view(),
+        EmailTokenObtainPairView.as_view(),
         name='token_obtain_pair'
     ),
 

@@ -1,6 +1,38 @@
-<h1>Manager Dashboard</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
 
-<h3>Total Employees : {{ total_employees }}</h3>
-<h3>Total Departments : {{ total_departments }}</h3>
+    <h1>Dashboard</h1>
 
-<a href="{% url 'logout' %}">Logout</a>
+    <hr>
+
+    <h3>Welcome {{ request.user.first_name }} {{ request.user.last_name }}</h3>
+
+    <p><strong>Email:</strong> {{ request.user.email }}</p>
+
+    <p><strong>Employee ID:</strong> {{ request.user.employee_id }}</p>
+
+    <p><strong>Phone:</strong> {{ request.user.phone }}</p>
+
+    <p><strong>Role:</strong> {{ request.user.role }}</p>
+
+    <p><strong>Date Joined:</strong> {{ request.user.date_joined }}</p>
+
+    {% if request.user.profile_image %}
+        <img src="{{ request.user.profile_image.url }}"
+             width="150"
+             height="150"
+             alt="Profile Image">
+    {% endif %}
+
+    <br><br>
+
+    <a href="{% url 'logout' %}">
+        Logout
+    </a>
+
+</body>
+</html>

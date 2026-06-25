@@ -1,0 +1,33 @@
+$kind: http-request
+name: Login
+method: POST
+url: '{{base_url}}/api/token/'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "",
+      "password": ""
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      var jsonData = pm.response.json();
+      if (!jsonData.access) {
+          console.error("Login failed. No access token returned.");
+          pm.environment.unset("token");
+          pm.environment.unset("token_expiry");
+          return;
+      }
+
+      pm.environment.set("token", jsonData.access);
+
+      // Decode JWT to extract expiry time
+      var tokenParts = jsonData.access.split('.');
+      var payload = JSON.parse(atob(tokenParts[1]));
+      pm.environment.set("token_expiry", payload.exp);

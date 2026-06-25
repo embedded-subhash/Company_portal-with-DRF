@@ -1,0 +1,27 @@
+$kind: http-request
+name: Get Employees
+method: GET
+url: '{{base_url}}/api/employees/'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      // Check if token is expired before sending the request
+      var expiry = pm.environment.get("token_expiry");
+      if (!expiry) {
+          console.warn("No token expiry found. Please run the Login request first.");
+      } else {
+          var now = Math.floor(Date.now() / 1000);
+          if (now >= expiry) {
+              console.warn("Token has expired. Please run the Login request to get a new token.");
+          } else {
+              var remaining = expiry - now;
+              console.log("Token is valid. Expires in " + remaining + " seconds.");
+          }
+      }
