@@ -1,17 +1,56 @@
-from django.urls import path
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView
+)
+
+from .views import (
+    EmployeeViewSet,
+    DepartmentViewSet,
+    UserViewSet
+)
+
+
+router = DefaultRouter()
+
+router.register(
+    r'employees',
+    EmployeeViewSet,
+    basename='employee'
+)
+
+router.register(
+    r'departments',
+    DepartmentViewSet,
+    basename='department'
+)
+
+router.register(
+    r'users',
+    UserViewSet,
+    basename='user'
+)
+
 
 urlpatterns = [
 
     path(
-        'employees/',
-        views.EmployeeListCreateAPIView.as_view(),
-        name='employee_list_create'
+        '',
+        include(router.urls)
     ),
 
     path(
-        'employees/<int:pk>/',
-        views.EmployeeDetailAPIView.as_view(),
-        name='employee_detail'
+        'token/',
+        TokenObtainPairView.as_view(),
+        name='token_obtain_pair'
     ),
+
+    path(
+        'token/refresh/',
+        TokenRefreshView.as_view(),
+        name='token_refresh'
+    ),
+
 ]
