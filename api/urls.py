@@ -1,56 +1,117 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from rest_framework_simplejwt.views import (
-    TokenRefreshView
-)
-
 from .views import (
     EmailTokenObtainPairView,
-    EmployeeViewSet,
+    EmployeeV1ViewSet,
+    EmployeeV2ViewSet,
     DepartmentViewSet,
+    LogoutView,
+    RefreshTokenView,
     UserViewSet
 )
+from audit_logs.views import AuditLogViewSet
 
 
-router = DefaultRouter()
+v1_router = DefaultRouter()
 
-router.register(
+v1_router.register(
     r'employees',
-    EmployeeViewSet,
+    EmployeeV1ViewSet,
     basename='employee'
 )
 
-router.register(
+v1_router.register(
     r'departments',
     DepartmentViewSet,
     basename='department'
 )
 
-router.register(
+v1_router.register(
     r'users',
     UserViewSet,
     basename='user'
 )
 
+v1_router.register(
+    r'audit-logs',
+    AuditLogViewSet,
+    basename='audit-log'
+)
+
+employee_v2_list = EmployeeV2ViewSet.as_view({
+    'get': 'list',
+    'post': 'create',
+})
+employee_v2_detail = EmployeeV2ViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
+    'delete': 'destroy',
+})
+department_v2_list = DepartmentViewSet.as_view({
+    'get': 'list',
+    'post': 'create',
+})
+department_v2_detail = DepartmentViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
+    'delete': 'destroy',
+})
 
 urlpatterns = [
 
     path(
-        '',
-        include(router.urls)
+        'v1/',
+        include(v1_router.urls)
     ),
 
     path(
-        'token/',
+        'v2/employees/',
+        employee_v2_list,
+        name='v2-employee-list'
+    ),
+
+    path(
+        'v2/employees/<int:pk>/',
+        employee_v2_detail,
+        name='v2-employee-detail'
+    ),
+
+    path(
+        'v2/departments/',
+        department_v2_list,
+        name='v2-department-list'
+    ),
+
+    path(
+        'v2/departments/<int:pk>/',
+        department_v2_detail,
+        name='v2-department-detail'
+    ),
+
+    path(
+        'v1/auth/login/',
         EmailTokenObtainPairView.as_view(),
         name='token_obtain_pair'
     ),
 
     path(
-        'token/refresh/',
-        TokenRefreshView.as_view(),
+        'v1/auth/refresh/',
+        RefreshTokenView.as_view(),
         name='token_refresh'
+    ),
+
+    path(
+        'v1/auth/logout/',
+        LogoutView.as_view(),
+        name='token_logout'
+    ),
+
+    path(
+        '',
+        include(v1_router.urls)
     ),
 
 ]

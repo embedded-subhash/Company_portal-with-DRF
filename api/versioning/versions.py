@@ -1,0 +1,2 @@
+V1_VERSION = "v1"
+V2_VERSION = "v2"

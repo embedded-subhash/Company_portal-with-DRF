@@ -22,7 +22,7 @@ class EmployeePermissionMixin(LoginRequiredMixin):
 
     def dispatch(self, request, *args, **kwargs):
 
-        if request.user.role == 'ADMIN':
+        if getattr(request.user, "role", None) == 'ADMIN':
             return super().dispatch(request, *args, **kwargs)
 
         if self.required_permission:

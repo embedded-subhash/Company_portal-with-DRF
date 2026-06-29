@@ -38,7 +38,16 @@ class Employee(models.Model):
 
     department = models.ForeignKey(
         Department,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='employees'
+    )
+
+    manager = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='team_members'
     )
 
     profile_image = models.ImageField(
