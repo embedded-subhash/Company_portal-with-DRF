@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure--v3ov$9@ve(_p!gejs&=1kgiu3j7y)%0eybbz2^6dylfh+_)kd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 
 # Application definition
@@ -39,9 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-     'employees.apps.EmployeesConfig',
+    'employees.apps.EmployeesConfig',
     'departments.apps.DepartmentsConfig',  
     'accounts',
+    'audit_logs.apps.AuditLogsConfig',
      # Third Party Apps
 
     'rest_framework',
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'api.middleware.CurrentRequestMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -137,43 +139,37 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = 'admin@companyportal.com'
 REST_FRAMEWORK = {
-
     'DEFAULT_AUTHENTICATION_CLASSES': (
-
-        'rest_framework.authentication.SessionAuthentication',
-
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-
     'DEFAULT_PERMISSION_CLASSES': (
-
-        'rest_framework.permissions.AllowAny',
-
+        'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-
     'DEFAULT_FILTER_BACKENDS': (
-
         'django_filters.rest_framework.DjangoFilterBackend',
-
         'rest_framework.filters.SearchFilter',
-
         'rest_framework.filters.OrderingFilter',
-
     ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
     ),
-
-    'DEFAULT_PAGINATION_CLASS':
-        'rest_framework.pagination.PageNumberPagination',
-
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '100/min',
+        'anon': '30/min',
+        'login': '100/min',
+        'employee': '100/min',
+    },
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler.custom_exception_handler',
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.StandardPagination',
     'PAGE_SIZE': 10,
+}
 
-
-
-
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'company-portal-cache',
+    }
 }
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
