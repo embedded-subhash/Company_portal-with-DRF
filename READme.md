@@ -1,246 +1,239 @@
-# Django HR Management System
+# Company Portal with Django & PostgreSQL Optimization
 
-A professional Employee Management Portal built using Django and PostgreSQL. This application provides employee registration, profile management, CRUD operations, form validation, image upload support, search, filtering, and pagination.
+## Project Overview
+
+Company Portal is an enterprise-level developed using Django, PostgreSQL, and Django ORM. The project implements production-grade database optimization techniques, transaction management, advanced SQL reporting, and scalable backend architecture.
 
 ## Features
 
 ### Employee Management
 
-* Create Employee
-* View Employee List
-* View Employee Details
-* Update Employee Information
-* Delete Employee Records
+* Employee CRUD Operations
+* Employee Search and Filtering
+* Department Assignment
+* Employee Profile Images
+* Role-Based Access Control (RBAC)
 
 ### Department Management
 
-* Department Creation
-* Department Assignment to Employees
+* Department CRUD Operations
+* One-to-Many Relationship with Employees
+* Department-wise Employee Reports
 
-### Form Validation
+### Payroll Management
 
-* Employee ID Validation (EMP001 Format)
+* Monthly Payroll Processing
+* Salary Management
+* Transaction-Based Payroll Operations
+* Payroll Reporting
+
+## Database Design
+
+The database follows normalization principles:
+
+* First Normal Form (1NF)
+* Second Normal Form (2NF)
+* Third Normal Form (3NF)
+
+### Database Relationships
+
+```text
+Department
+    |
+    | One-to-Many
+    |
+Employee
+    |
+    | One-to-Many
+    |
+Payroll
+```
+
+## Database Constraints
+
+### Employee Constraints
+
 * Unique Employee ID
-* Unique Email Validation
-* Phone Number Validation
-* Salary Range Validation
-* Joining Date Validation
+* Unique Email Address
+* Salary must be greater than or equal to 10000
+* Foreign Key constraint on Department
 
-### Profile Image Upload
+### Department Constraints
 
-* Upload Employee Profile Image
-* Display Employee Image
-* Update Employee Image
+* Unique Department Name
 
-### Search and Filtering
+Example:
 
-* Search by Employee ID
-* Search by Name
-* Search by Email
-* Filter by Department
-* Filter by Status
+```python
+constraints = [
+    models.CheckConstraint(
+        condition=Q(salary__gte=10000),
+        name="salary_greater_than_10000"
+    )
+]
+```
 
-### Pagination
+## Database Indexing
 
-* 10 Employees Per Page
+Implemented indexes:
 
-### Django Generic Views
+* idx_employee_id
+* idx_employee_email
+* idx_department
+* idx_joining_date
+* idx_salary
+* idx_department_salary
 
-* CreateView
-* ListView
-* DetailView
-* UpdateView
-* DeleteView
+Benefits:
 
-### Messages Framework
+* Faster search operations
+* Reduced query execution time
+* Improved scalability for large datasets
 
-* Success Messages
-* Error Messages
-* Validation Messages
+## Advanced SQL Reports
 
----
+Implemented reports include:
 
-## Technology Stack
+* Highest Paid Employee
+* Lowest Paid Employee
+* Top 10 Highest Salaries
+* Average Salary by Department
+* Employees Joined This Year
+* Total Employees per Department
+* Departments with More Than 20 Employees
+* Employees Earning Above Department Average
 
-* Python 3.14
-* Django 6
-* PostgreSQL
-* HTML
-* CSS
-* Bootstrap (Optional)
-* Pillow
+## Database Joins
 
----
+Implemented:
+
+* INNER JOIN
+* LEFT JOIN
+
+Examples:
+
+* Employee + Department Report
+* Employee + Payroll Report
+
+## Transaction Management
+
+Payroll processing uses Django atomic transactions:
+
+```python
+@transaction.atomic
+def process_salary():
+    pass
+```
+
+Features:
+
+* Atomicity
+* Consistency
+* Isolation
+* Durability (ACID)
+
+Rollback occurs automatically if any operation fails.
+
+## Raw SQL Integration
+
+Implemented raw SQL reports using:
+
+```python
+from django.db import connection
+```
+
+Reports include:
+
+* Top Salary Report
+* Department Summary
+* Monthly Payroll Report
+
+## ORM Optimization
+
+Implemented:
+
+### select_related()
+
+```python
+Employee.objects.select_related("department")
+```
+
+### annotate()
+
+```python
+Department.objects.annotate(
+    total_employees=Count("employee")
+)
+```
+
+### aggregate()
+
+```python
+Employee.objects.aggregate(
+    Avg("salary")
+)
+```
+
+Benefits:
+
+* Eliminates N+1 Query Problem
+* Reduces Database Queries
+* Improves API Performance
+
+## Database Backup and Restore
+
+### Backup
+
+```bash
+pg_dump -U postgres company_db > sql/backup.sql
+```
+
+### Restore
+
+```bash
+psql -U postgres company_db < sql/backup.sql
+```
+
+Automation scripts:
+
+```text
+backup_database.bat
+restore_database.bat
+```
 
 ## Project Structure
 
+```text
 company_portal/
-
-├── company_portal/
-
+│
 ├── employees/
-
-│   ├── forms.py
-
-│   ├── models.py
-
-│   ├── views.py
-
-│   ├── urls.py
-
-│   └── templates/
-
-│       └── employees/
-
 ├── departments/
-
-│   ├── models.py
-
-│   └── admin.py
-
-├── media/
-
-│   └── employees/
-
-├── manage.py
-
-└── requirements.txt
-
----
-
-## Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/embedded-subhash/django-hr-management-system.git
-
-cd django-hr-management-system
+├── payroll/
+├── reports/
+├── services/
+│   └── payroll_service.py
+│
+├── sql/
+│   ├── indexes.sql
+│   ├── reports.sql
+│   └── backup.sql
+│
+├── backup_database.bat
+├── restore_database.bat
+├── QUERY_OPTIMIZATION_REPORT.md
+└── README.md
 ```
 
-### Create Virtual Environment
+## Technology Stack
 
-```bash
-python -m venv .venv
-```
-
-### Activate Virtual Environment
-
-Windows
-
-```bash
-.venv\Scripts\activate
-```
-
-Linux/Mac
-
-```bash
-source .venv/bin/activate
-```
-
-### Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## PostgreSQL Configuration
-
-Create Database
-
-```sql
-CREATE DATABASE company_db;
-```
-
-Update settings.py
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'company_db',
-        'USER': 'postgres',
-        'PASSWORD': 'your_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
-
----
-
-## Run Migrations
-
-```bash
-python manage.py makemigrations
-
-python manage.py migrate
-```
-
----
-
-## Create Superuser
-
-```bash
-python manage.py createsuperuser
-```
-
----
-
-## Run Server
-
-```bash
-python manage.py runserver
-```
-
-Open:
-
-```text
-http://127.0.0.1:8000/
-```
-
-Employee Module:
-
-```text
-http://127.0.0.1:8000/employees/
-```
-
-Admin Panel:
-
-```text
-http://127.0.0.1:8000/admin/
-```
-
----
-
-## Employee CRUD URLs
-
-| Function        | URL                     |
-| --------------- | ----------------------- |
-| Employee List   | /employees/             |
-| Create Employee | /employees/create/      |
-| Employee Detail | /employees/<id>/        |
-| Update Employee | /employees/update/<id>/ |
-| Delete Employee | /employees/delete/<id>/ |
-
----
-
-## Screenshots
-
-Include:
-
-* Employee List
-* Create Employee
-* Employee Detail
-* Update Employee
-* Delete Employee
-* Validation Errors
-* Search and Filter
-* Profile Image Upload
-
----
+* Python 3
+* Django
+* PostgreSQL
+* Django ORM
+* Raw SQL
+* HTML
+* Bootstrap
+* Git & GitHub
 
 ## Git Workflow
 
@@ -249,44 +242,24 @@ git checkout development
 
 git pull origin development
 
-git checkout -b feature/employee-crud
+git checkout -b feature/postgresql-optimization
 ```
 
-Commit Messages
+Commit Messages:
 
 ```bash
-feat: implement employee forms
+feat: add PostgreSQL constraints
 
-feat: implement CRUD operations
+feat: create indexes for employee tables
 
-feat: add profile image upload
+feat: implement payroll transaction service
 
-feat: implement search and filtering
+feat: optimize ORM queries
 
-feat: add pagination support
+feat: add backup and restore scripts
 ```
-
----
 
 ## Author
 
 Subhash
-
-Software Engineer
-
-Django Backend Developer Trainee
-
----
-
-## Project Status
-
-Completed
-
-* Employee Registration
-* CRUD Operations
-* PostgreSQL Integration
-* Form Validation
-* Django Generic Views
-* Profile Image Upload
-* Pagination
-* Messages Framework
+Software Engineer | Backend Developer | Django & PostgreSQL Enthusiast

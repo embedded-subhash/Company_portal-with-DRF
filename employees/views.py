@@ -79,7 +79,10 @@ class EmployeeListView(
 
     def get_queryset(self):
 
-        queryset = Employee.objects.all()
+        # ORM Optimization using select_related()
+        queryset = Employee.objects.select_related(
+            'department'
+        ).all()
 
         search = self.request.GET.get('search')
         department = self.request.GET.get('department')
@@ -126,6 +129,11 @@ class EmployeeDetailView(
     model = Employee
     template_name = 'employees/detail.html'
     context_object_name = 'employee'
+
+    # ORM Optimization
+    queryset = Employee.objects.select_related(
+        'department'
+    )
 
 
 class EmployeeUpdateView(

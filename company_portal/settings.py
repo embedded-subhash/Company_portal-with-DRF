@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
      'employees.apps.EmployeesConfig',
     'departments.apps.DepartmentsConfig',  
-    'accounts',
+    'payroll',
+    'reports',
 ]
 
 MIDDLEWARE = [
@@ -124,7 +125,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-AUTH_USER_MODEL = 'accounts.User'
+###AUTH_USER_MODEL = 'accounts.User'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = 'admin@companyportal.com'
