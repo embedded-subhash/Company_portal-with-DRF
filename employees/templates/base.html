@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Company Portal</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 30px;
+        }
+
+        nav {
+            margin-bottom: 20px;
+        }
+
+        nav a {
+            margin-right: 15px;
+            text-decoration: none;
+        }
+
+        .messages {
+            color: green;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <a href="/employees/">Employees</a>
+        <a href="/employees/create/">Create Employee</a>
+        <a href="/employees/import/">Import Employees</a>
+    </nav>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>

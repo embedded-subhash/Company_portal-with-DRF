@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
-
+from employees.views.task_view import TaskStatusView
 urlpatterns = [
 
     path(
@@ -21,11 +21,6 @@ urlpatterns = [
     ),
 
     path(
-        'accounts/',
-        include('accounts.urls')
-    ),
-
-    path(
         'employees/',
         include('employees.urls')
     ),
@@ -34,6 +29,7 @@ urlpatterns = [
        'departments/',
         include('departments.urls')
     ),
+     path('tasks/<str:task_id>/', TaskStatusView.as_view()),
 ]
 
 if settings.DEBUG:

@@ -1,40 +1,56 @@
 from django.urls import path
+
 from .views import (
     EmployeeCreateView,
     EmployeeListView,
     EmployeeDetailView,
     EmployeeUpdateView,
-    EmployeeDeleteView
+    EmployeeDeleteView,
+    EmployeeImportView,
+    TaskStatusView,
 )
 
 urlpatterns = [
+
     path(
-        '',
+        "",
         EmployeeListView.as_view(),
-        name='employee_list'
+        name="employee_list"
     ),
 
     path(
-        'create/',
+        "create/",
         EmployeeCreateView.as_view(),
-        name='employee_create'
+        name="employee_create"
     ),
 
     path(
-        '<int:pk>/',
+        "<int:pk>/",
         EmployeeDetailView.as_view(),
-        name='employee_detail'
+        name="employee_detail"
     ),
 
     path(
-        'update/<int:pk>/',
+        "<int:pk>/update/",
         EmployeeUpdateView.as_view(),
-        name='employee_update'
+        name="employee_update"
     ),
 
     path(
-        'delete/<int:pk>/',
+        "<int:pk>/delete/",
         EmployeeDeleteView.as_view(),
-        name='employee_delete'
+        name="employee_delete"
+    ),
+
+    path(
+        "import/",
+        EmployeeImportView.as_view(),
+        name="employee_import"
+    ),
+
+    path(
+        "tasks/<str:task_id>/",
+        TaskStatusView.as_view(),
+        name="task_status"
     ),
 ]
