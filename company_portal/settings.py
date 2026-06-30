@@ -9,13 +9,22 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "admin@company.com"
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+import os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+STATIC_URL = 'static/'
+import os
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -37,8 +46,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'employees',
-    'departments',  
+     'employees.apps.EmployeesConfig',
+    'departments.apps.DepartmentsConfig',  
+    ###'accounts',
+    'django_celery_results',
+    'django_celery_beat',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -56,8 +69,13 @@ ROOT_URLCONF = 'company_portal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+
         'APP_DIRS': True,
+
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
@@ -67,7 +85,6 @@ TEMPLATES = [
         },
     },
 ]
-
 WSGI_APPLICATION = 'company_portal.wsgi.application'
 
 
@@ -91,6 +108,9 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
+
+
+
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
@@ -121,3 +141,100 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = 'admin@companyportal.com'
+# CELERY CONFIGURATION
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+
+CELERY_RESULT_BACKEND = "django-db"
+
+CELERY_ACCEPT_CONTENT = ["json"]
+
+CELERY_TASK_SERIALIZER = "json"
+
+CELERY_RESULT_SERIALIZER = "json"
+
+CELERY_TIMEZONE = "Asia/Kolkata"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+
+    # ----------------------------------------
+    # 1. DAILY ATTENDANCE REPORT (HR SYSTEM)
+    # Runs every day at 6:00 PM
+    # ----------------------------------------
+    "daily-attendance-report": {
+        "task": "employees.tasks.generate_attendance_report",
+        "schedule": crontab(hour=18, minute=0),
+    },
+
+    # ----------------------------------------
+    # 2. MONTHLY PAYROLL GENERATION
+    # Runs on 1st of every month at 2:00 AM
+    # ----------------------------------------
+    "monthly-payroll-generation": {
+        "task": "employees.tasks.generate_salary_pdf",
+        "schedule": crontab(day_of_month=1, hour=2, minute=0),
+        "args": (101,),  # sample employee_id for testing
+    },
+
+    # ----------------------------------------
+    # 3. WEEKLY HR NOTIFICATION SUMMARY
+    # Runs every Monday at 9:00 AM
+    # ----------------------------------------
+    "weekly-hr-notification": {
+        "task": "employees.tasks.notify_hr",
+        "schedule": crontab(day_of_week=1, hour=9, minute=0),
+        "args": ("Weekly HR Summary Report",),
+    },
+
+    # ----------------------------------------
+    # 4. HOURLY CLEANUP JOB
+    # Cleans temporary logs / files every hour
+    # ----------------------------------------
+    "hourly-cleanup-task": {
+        "task": "employees.tasks.cleanup_temp_data",
+        "schedule": crontab(minute=0, hour="*"),
+    },
+
+    # ----------------------------------------
+    # 5. DAILY WELCOME EMAIL CHECK (SIMULATION)
+    # Runs every day at 10:00 AM
+    # ----------------------------------------
+    "daily-welcome-email-check": {
+        "task": "employees.tasks.send_welcome_email",
+        "schedule": crontab(hour=10, minute=0),
+        "args": ("testuser@company.com",),
+    },
+}
+from kombu import Queue
+
+CELERY_TASK_QUEUES = (
+    Queue("emails"),
+    Queue("payroll"),
+    Queue("reports"),
+    Queue("notifications"),
+)
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "handlers": {
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "logs/celery.log",
+        },
+    },
+
+    "loggers": {
+        "celery": {
+            "handlers": ["file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}
