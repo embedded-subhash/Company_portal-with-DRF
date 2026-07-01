@@ -1,292 +1,514 @@
-# Django HR Management System
+# Employee Analytics & Advanced Django ORM Optimization Module
 
-A professional Employee Management Portal built using Django and PostgreSQL. This application provides employee registration, profile management, CRUD operations, form validation, image upload support, search, filtering, and pagination.
+## Project Overview
 
-## Features
+This module focuses on mastering advanced Django ORM concepts for building high-performance, scalable, and production-grade backend systems. It includes complex query construction, database optimization techniques, model relationships, custom managers, transactions, and analytics dashboards.
 
-### Employee Management
+The system simulates an enterprise HR Analytics platform used for handling large-scale employee datasets efficiently.
 
-* Create Employee
-* View Employee List
-* View Employee Details
-* Update Employee Information
-* Delete Employee Records
+---
 
-### Department Management
+## Training Goal
 
-* Department Creation
-* Department Assignment to Employees
-
-### Form Validation
-
-* Employee ID Validation (EMP001 Format)
-* Unique Employee ID
-* Unique Email Validation
-* Phone Number Validation
-* Salary Range Validation
-* Joining Date Validation
-
-### Profile Image Upload
-
-* Upload Employee Profile Image
-* Display Employee Image
-* Update Employee Image
-
-### Search and Filtering
-
-* Search by Employee ID
-* Search by Name
-* Search by Email
-* Filter by Department
-* Filter by Status
-
-### Pagination
-
-* 10 Employees Per Page
-
-### Django Generic Views
-
-* CreateView
-* ListView
-* DetailView
-* UpdateView
-* DeleteView
-
-### Messages Framework
-
-* Success Messages
-* Error Messages
-* Validation Messages
+Master Django ORM by implementing advanced query techniques, optimizing database performance, designing complex relationships, using transactions, and building analytics-driven HR dashboards.
 
 ---
 
 ## Technology Stack
 
-* Python 3.14
-* Django 6
-* PostgreSQL
-* HTML
-* CSS
-* Bootstrap (Optional)
-* Pillow
+| Technology | Purpose                    |
+| ---------- | -------------------------- |
+| Python 3.x | Backend Language           |
+| Django ORM | Database Abstraction Layer |
+| PostgreSQL | Relational Database        |
+| Git        | Version Control            |
+| GitHub     | Repository Hosting         |
 
 ---
 
-## Project Structure
+## Learning Objectives
 
-company_portal/
+After completing this module, developers will be able to:
 
-├── company_portal/
+* Write advanced Django ORM queries
+* Optimize database performance
+* Use Q objects for complex filtering
+* Apply F expressions for field-level operations
+* Implement aggregation and annotation
+* Design model relationships
+* Create custom managers and querysets
+* Use database transactions safely
+* Optimize queries using Django tools
 
-├── employees/
+---
 
-│   ├── forms.py
+# Module 1: Advanced Django ORM
 
-│   ├── models.py
+## Core Concepts
 
-│   ├── views.py
+### QuerySets
 
-│   ├── urls.py
+QuerySets are lazy database queries executed only when needed.
 
-│   └── templates/
+---
 
-│       └── employees/
+### Lazy Loading
 
-├── departments/
+Data is not fetched immediately; it is executed when evaluated.
 
-│   ├── models.py
+---
 
-│   └── admin.py
+### Query Execution
 
-├── media/
+Django ORM translates Python code into SQL queries internally.
 
-│   └── employees/
+---
 
+### Q Objects
+
+Used for complex conditional queries.
+
+Example:
+
+```python id="q1a7kd"
+Employee.objects.filter(
+    Q(department="IT") &
+    Q(salary__gt=50000)
+)
+```
+
+---
+
+### F Expressions
+
+Used to perform database-level operations without Python loops.
+
+Example:
+
+```python id="f8k2lp"
+Employee.objects.update(salary=F('salary') * 1.10)
+```
+
+---
+
+### annotate()
+
+Used to add computed fields to QuerySets.
+
+---
+
+### aggregate()
+
+Used for summary statistics like sum, avg, max, min.
+
+---
+
+## Practical Tasks
+
+### Reports Module
+
+* Top 10 Highest Paid Employees
+* Department-wise Employee Count
+* Monthly Salary Statistics
+* Employees Joined This Month
+
+---
+
+# Module 2: Complex Filtering
+
+## Q Object Operations
+
+### AND Condition
+
+```python id="and001"
+Employee.objects.filter(
+    Q(department="IT") &
+    Q(salary__gt=50000)
+)
+```
+
+---
+
+### OR Condition
+
+```python id="or001"
+Employee.objects.filter(
+    Q(department="IT") | Q(department="HR")
+)
+```
+
+---
+
+### NOT Condition
+
+```python id="not001"
+Employee.objects.filter(~Q(department="Finance"))
+```
+
+---
+
+# Module 3: F Expressions
+
+## Salary Increment Task
+
+Increase all employee salaries by 10% without loops:
+
+```python id="fexp01"
+Employee.objects.update(salary=F('salary') * 1.10)
+```
+
+---
+
+# Module 4: Aggregation
+
+## HR Dashboard Statistics
+
+### Count Employees
+
+```python id="agg01"
+Employee.objects.count()
+```
+
+---
+
+### Sum Salary
+
+```python id="agg02"
+Employee.objects.aggregate(Sum('salary'))
+```
+
+---
+
+### Average Salary
+
+```python id="agg03"
+Employee.objects.aggregate(Avg('salary'))
+```
+
+---
+
+### Maximum Salary
+
+```python id="agg04"
+Employee.objects.aggregate(Max('salary'))
+```
+
+---
+
+### Minimum Salary
+
+```python id="agg05"
+Employee.objects.aggregate(Min('salary'))
+```
+
+---
+
+# Module 5: Annotation
+
+## Department Dashboard
+
+Example Output:
+
+| Department | Employee Count | Avg Salary | Max Salary | Min Salary |
+| ---------- | -------------- | ---------- | ---------- | ---------- |
+
+```python id="ann01"
+Department.objects.annotate(
+    employee_count=Count('employee'),
+    avg_salary=Avg('employee__salary'),
+    max_salary=Max('employee__salary'),
+    min_salary=Min('employee__salary')
+)
+```
+
+---
+
+# Module 6: Model Relationships
+
+## One-to-One Relationship
+
+Employee ↔ EmployeeProfile
+
+```python id="rel01"
+class EmployeeProfile(models.Model):
+    employee = models.OneToOneField(Employee, on_delete=models.CASCADE)
+```
+
+---
+
+## One-to-Many Relationship
+
+Department → Employees
+
+```python id="rel02"
+department = models.ForeignKey(Department, on_delete=models.CASCADE)
+```
+
+---
+
+## Many-to-Many Relationship
+
+Employee ↔ Skills
+
+```python id="rel03"
+class Skill(models.Model):
+    name = models.CharField(max_length=100)
+
+class Employee(models.Model):
+    skills = models.ManyToManyField(Skill)
+```
+
+---
+
+## Practical Task
+
+Build Employee Skill Management System:
+
+* Assign skills
+* Remove skills
+* Filter employees by skills
+
+---
+
+# Module 7: Custom Managers
+
+## Employee Manager
+
+```python id="mgr01"
+class EmployeeManager(models.Manager):
+
+    def active_employees(self):
+        return self.filter(is_active=True)
+
+    def inactive_employees(self):
+        return self.filter(is_active=False)
+
+    def highest_salary(self):
+        return self.order_by('-salary').first()
+
+    def new_joiners(self):
+        return self.filter(joining_date__month=timezone.now().month)
+```
+
+---
+
+# Module 8: Custom QuerySets
+
+## Reusable Query Methods
+
+```python id="qs01"
+class EmployeeQuerySet(models.QuerySet):
+
+    def active(self):
+        return self.filter(is_active=True)
+
+    def engineering(self):
+        return self.filter(department__name="Engineering")
+
+    def high_salary(self):
+        return self.filter(salary__gt=80000)
+```
+
+---
+
+## Chained Queries
+
+```python id="chain01"
+Employee.objects.active().engineering().high_salary()
+```
+
+---
+
+# Module 9: Database Transactions
+
+## Transaction Safety
+
+```python id="txn01"
+from django.db import transaction
+
+with transaction.atomic():
+    employee.salary += 5000
+    employee.save()
+
+    Payroll.objects.create(employee=employee, amount=employee.salary)
+```
+
+---
+
+## Failure Handling
+
+If payroll creation fails:
+
+* Employee update is rolled back automatically
+
+---
+
+# Module 10: Query Optimization
+
+## Optimization Techniques
+
+### select_related()
+
+Used for ForeignKey relationships.
+
+### prefetch_related()
+
+Used for Many-to-Many relationships.
+
+---
+
+### only()
+
+Fetch specific fields only.
+
+---
+
+### defer()
+
+Delay loading of fields.
+
+---
+
+## Example Optimization
+
+```python id="opt01"
+Employee.objects.select_related('department')
+```
+
+```python id="opt02"
+Employee.objects.prefetch_related('skills')
+```
+
+---
+
+## Performance Tracking
+
+Measure:
+
+* Number of queries
+* Query execution time
+* Database load reduction
+
+---
+
+# Company-Level Assignment
+
+## HR Analytics Module
+
+### Features
+
+* Advanced Employee Search
+* Employee Statistics Dashboard
+* Department Reports
+* Salary Analytics
+* Skill Mapping System
+* Optimized Query Performance
+* Transaction-safe Payroll System
+
+---
+
+# Project Structure
+
+```text id="str01"
+employee_analytics/
+│
 ├── manage.py
-
+├── analytics/
+│   ├── models.py
+│   ├── managers.py
+│   ├── querysets.py
+│   ├── services.py
+│   ├── views.py
+│   └── urls.py
+│
+├── hr/
+├── payroll/
 └── requirements.txt
-
----
-
-## Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/embedded-subhash/django-hr-management-system.git
-
-cd django-hr-management-system
-```
-
-### Create Virtual Environment
-
-```bash
-python -m venv .venv
-```
-
-### Activate Virtual Environment
-
-Windows
-
-```bash
-.venv\Scripts\activate
-```
-
-Linux/Mac
-
-```bash
-source .venv/bin/activate
-```
-
-### Install Dependencies
-
-```bash
-pip install -r requirements.txt
 ```
 
 ---
 
-## PostgreSQL Configuration
+# Git Workflow
 
-Create Database
+## Create Feature Branch
 
-```sql
-CREATE DATABASE company_db;
-```
-
-Update settings.py
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'company_db',
-        'USER': 'postgres',
-        'PASSWORD': 'your_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
-
----
-
-## Run Migrations
-
-```bash
-python manage.py makemigrations
-
-python manage.py migrate
-```
-
----
-
-## Create Superuser
-
-```bash
-python manage.py createsuperuser
-```
-
----
-
-## Run Server
-
-```bash
-python manage.py runserver
-```
-
-Open:
-
-```text
-http://127.0.0.1:8000/
-```
-
-Employee Module:
-
-```text
-http://127.0.0.1:8000/employees/
-```
-
-Admin Panel:
-
-```text
-http://127.0.0.1:8000/admin/
-```
-
----
-
-## Employee CRUD URLs
-
-| Function        | URL                     |
-| --------------- | ----------------------- |
-| Employee List   | /employees/             |
-| Create Employee | /employees/create/      |
-| Employee Detail | /employees/<id>/        |
-| Update Employee | /employees/update/<id>/ |
-| Delete Employee | /employees/delete/<id>/ |
-
----
-
-## Screenshots
-
-Include:
-
-* Employee List
-* Create Employee
-* Employee Detail
-* Update Employee
-* Delete Employee
-* Validation Errors
-* Search and Filter
-* Profile Image Upload
-
----
-
-## Git Workflow
-
-```bash
+```bash id="git01"
 git checkout development
-
 git pull origin development
-
-git checkout -b feature/employee-crud
-```
-
-Commit Messages
-
-```bash
-feat: implement employee forms
-
-feat: implement CRUD operations
-
-feat: add profile image upload
-
-feat: implement search and filtering
-
-feat: add pagination support
+git checkout -b feature/advanced-django-orm
 ```
 
 ---
 
-## Author
+## Commit Messages
 
-Subhash
-
-Software Engineer
-
-Django Backend Developer Trainee
+```text id="git02"
+feat: implement advanced ORM queries
+feat: add employee analytics dashboard
+feat: implement custom managers
+feat: optimize database queries
+feat: add transactional payroll processing
+```
 
 ---
 
-## Project Status
+# Jira Story
 
-Completed
+## Story Title
 
-* Employee Registration
-* CRUD Operations
-* PostgreSQL Integration
-* Form Validation
-* Django Generic Views
-* Profile Image Upload
-* Pagination
-* Messages Framework
+Build Employee Analytics & ORM Optimization Module
+
+---
+
+## Description
+
+As a Django Backend Developer Trainee,
+
+I need to implement advanced ORM queries, model relationships, analytics, and optimized database operations so that the HRMS application performs efficiently with large datasets.
+
+---
+
+# Acceptance Criteria
+
+* Advanced ORM queries implemented
+* Analytics dashboard completed
+* One-to-One, One-to-Many, Many-to-Many relationships configured
+* Custom Managers and QuerySets implemented
+* Transaction-safe payroll system implemented
+* Query optimization applied using select_related and prefetch_related
+* Git feature branch workflow followed
+
+---
+
+# Priority
+
+High
+
+---
+
+# Estimated Effort
+
+8 Hours
+
+---
+
+# Learning Outcomes
+
+After completing this module, developers will understand:
+
+* Advanced Django ORM internals
+* High-performance query design
+* Database relationship modeling
+* Enterprise-level data analytics
+* Transaction management
+* Query optimization strategies
+* Scalable backend architecture
+* Production-ready Django development practices
+
+---
+
+# Author
+
+**Subhash**
+
+Software Engineer | Django Backend Developer | ORM & Performance Optimization Learner
