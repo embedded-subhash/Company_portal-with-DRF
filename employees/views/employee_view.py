@@ -12,8 +12,8 @@ from django.views.generic import (
     DeleteView
 )
 
-from .models import Employee
-from .forms import EmployeeForm
+from employees.models import Employee
+from employees.forms import EmployeeForm
 
 
 class EmployeePermissionMixin(LoginRequiredMixin):
@@ -170,6 +170,6 @@ class EmployeeDeleteView(
 
         return super().delete(
             request,
-            *args,
+            *args, 
             **kwargs
         )

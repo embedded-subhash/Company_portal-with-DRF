@@ -1,5 +1,11 @@
 from django.db import models
+
 from departments.models import Department
+from employees.managers import (
+    
+    ActiveEmployeeManager,
+    HighSalaryManager
+)
 
 
 class Employee(models.Model):
@@ -27,13 +33,17 @@ class Employee(models.Model):
 
     salary = models.DecimalField(
         max_digits=10,
-        decimal_places=2
+        decimal_places=2,
+        db_index=True
     )
 
-    joining_date = models.DateField()
+    joining_date = models.DateField(
+        db_index=True
+    )
 
     designation = models.CharField(
-        max_length=100
+        max_length=100,
+        db_index=True
     )
 
     department = models.ForeignKey(
@@ -61,5 +71,14 @@ class Employee(models.Model):
         auto_now=True
     )
 
+    # Custom Managers
+    objects = models.Manager()
+    active = ActiveEmployeeManager()
+    high_salary = HighSalaryManager()
+
     def __str__(self):
-        return f"{self.employee_id} - {self.first_name} {self.last_name}"
+
+        return (
+            f"{self.employee_id} - "
+            f"{self.first_name} {self.last_name}"
+        )
