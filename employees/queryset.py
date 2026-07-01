@@ -1,20 +1,23 @@
 from django.db import models
-from datetime import date
+from django.utils import timezone
 
 
 class EmployeeQuerySet(models.QuerySet):
 
     def active(self):
-        return self.filter(status=True)
-
-    def inactive(self):
-        return self.filter(status=False)
+        return self.filter(
+            status=True
+        )
 
     def high_salary(self):
-        return self.filter(salary__gte=50000)
+        return self.filter(
+            salary__gte=100000
+        )
 
     def joined_this_month(self):
-        today = date.today()
+
+        today = timezone.now()
+
         return self.filter(
             joining_date__year=today.year,
             joining_date__month=today.month

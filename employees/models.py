@@ -1,11 +1,7 @@
 from django.db import models
 
 from departments.models import Department
-from employees.managers import (
-    
-    ActiveEmployeeManager,
-    HighSalaryManager
-)
+from employees.managers import EmployeeManager
 
 
 class Employee(models.Model):
@@ -71,10 +67,8 @@ class Employee(models.Model):
         auto_now=True
     )
 
-    # Custom Managers
-    objects = models.Manager()
-    active = ActiveEmployeeManager()
-    high_salary = HighSalaryManager()
+    # Custom Manager
+    objects = EmployeeManager()
 
     def __str__(self):
 
