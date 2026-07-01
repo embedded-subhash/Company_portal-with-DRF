@@ -479,17 +479,6 @@ I need to implement advanced ORM queries, model relationships, analytics, and op
 * Git feature branch workflow followed
 
 ---
-
-# Priority
-
-High
-
----
-
-# Estimated Effort
-
-8 Hours
-
 ---
 
 # Learning Outcomes
