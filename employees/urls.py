@@ -1,17 +1,27 @@
 from django.urls import path
+
 from .views import (
-    EmployeeCreateView,
     EmployeeListView,
+    EmployeeCreateView,
     EmployeeDetailView,
     EmployeeUpdateView,
-    EmployeeDeleteView
+    EmployeeDeleteView,
+    slow_view,
+    dashboard
 )
 
 urlpatterns = [
+
     path(
         '',
         EmployeeListView.as_view(),
         name='employee_list'
+    ),
+
+    path(
+        'dashboard/',
+        dashboard,
+        name='dashboard'
     ),
 
     path(
@@ -37,4 +47,11 @@ urlpatterns = [
         EmployeeDeleteView.as_view(),
         name='employee_delete'
     ),
+
+    path(
+        'slow/',
+        slow_view,
+        name='slow'
+    ),
+
 ]

@@ -1,9 +1,11 @@
+import time
 from django.contrib import messages
-from django.urls import reverse_lazy
-from django.db.models import Q
-from django.shortcuts import redirect
-
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q, Count, Avg, Max, Min
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import (
     CreateView,
     ListView,
@@ -12,8 +14,71 @@ from django.views.generic import (
     DeleteView
 )
 
-from .models import Employee
+from departments.models import Department
 from .forms import EmployeeForm
+from .models import Employee
+
+
+def slow_view(request):
+
+    time.sleep(1)
+
+    return HttpResponse(
+        "Slow view executed"
+    )
+
+
+def dashboard(request):
+
+    today = timezone.now().date()
+
+    total_employees = Employee.objects.count()
+
+    active_employees = Employee.objects.filter(
+        status=True
+    ).count()
+
+    inactive_employees = Employee.objects.filter(
+        status=False
+    ).count()
+
+    total_departments = Department.objects.count()
+
+    employees_joined_today = Employee.objects.filter(
+        joining_date=today
+    ).count()
+
+    employees_joined_this_month = Employee.objects.filter(
+        joining_date__year=today.year,
+        joining_date__month=today.month
+    ).count()
+
+    department_stats = Department.objects.annotate(
+        employee_count=Count("employee")
+    )
+
+    salary_stats = Employee.objects.aggregate(
+        average_salary=Avg("salary"),
+        maximum_salary=Max("salary"),
+        minimum_salary=Min("salary")
+    )
+
+    context = {
+        "total_employees": total_employees,
+        "active_employees": active_employees,
+        "inactive_employees": inactive_employees,
+        "total_departments": total_departments,
+        "employees_joined_today": employees_joined_today,
+        "employees_joined_this_month": employees_joined_this_month,
+        "department_stats": department_stats,
+        "salary_stats": salary_stats,
+    }
+
+    return render(
+        request,
+        "dashboard.html",
+        context
+    )
 
 
 class EmployeePermissionMixin(LoginRequiredMixin):
@@ -23,17 +88,23 @@ class EmployeePermissionMixin(LoginRequiredMixin):
     def dispatch(self, request, *args, **kwargs):
 
         if request.user.role == 'ADMIN':
-            return super().dispatch(request, *args, **kwargs)
+            return super().dispatch(
+                request,
+                *args,
+                **kwargs
+            )
 
         if self.required_permission:
 
             if not request.user.has_perm(
                 self.required_permission
             ):
+
                 messages.error(
                     request,
                     "You do not have permission."
                 )
+
                 return redirect('dashboard')
 
         return super().dispatch(
@@ -86,6 +157,7 @@ class EmployeeListView(
         status = self.request.GET.get('status')
 
         if search:
+
             queryset = queryset.filter(
                 Q(employee_id__icontains=search) |
                 Q(first_name__icontains=search) |
@@ -94,11 +166,13 @@ class EmployeeListView(
             )
 
         if department:
+
             queryset = queryset.filter(
                 department__name=department
             )
 
         if status:
+
             queryset = queryset.filter(
                 status=status
             )
@@ -108,8 +182,6 @@ class EmployeeListView(
     def get_context_data(self, **kwargs):
 
         context = super().get_context_data(**kwargs)
-
-        from departments.models import Department
 
         context['departments'] = Department.objects.all()
 

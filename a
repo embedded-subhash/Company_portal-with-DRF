@@ -1,0 +1,14 @@
++ [36magents/fix-unauthorized-api-access[m
++ [36magents/fix-unauthorized-api-access-1ae37ea3[m
+  development[m
+* [32mfeature/advanced-django-orm[m
+  feature/advanced-drf[m
+  feature/authentication-rbac[m
+  feature/ce[m
+  feature/celery-background-jobs[m
+  feature/drf-api-development[m
+  feature/models-postgresql[m
+  feature/postgresql-optimization[m
+  feature/serializers[m
+  main[m
+  switch[m

@@ -1,0 +1,7 @@
+=== HRMS REPORT ===
+
+Total Employees: 0
+Total Departments: 2
+Average Salary: None
+Maximum Salary: None
+Minimum Salary: None

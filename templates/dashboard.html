@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>HRMS Dashboard</title>
+</head>
+
+<body>
+
+    <h1>HRMS Dashboard</h1>
+
+    <hr>
+
+    <h2>Employee Statistics</h2>
+
+    <p>Total Employees: {{ total_employees }}</p>
+
+    <p>Active Employees: {{ active_employees }}</p>
+
+    <p>Inactive Employees: {{ inactive_employees }}</p>
+
+    <p>Total Departments: {{ total_departments }}</p>
+
+    <p>Employees Joined Today: {{ employees_joined_today }}</p>
+
+    <p>Employees Joined This Month: {{ employees_joined_this_month }}</p>
+
+    <hr>
+
+    <h2>Salary Statistics</h2>
+
+    <p>Average Salary: {{ salary_stats.average_salary }}</p>
+
+    <p>Maximum Salary: {{ salary_stats.maximum_salary }}</p>
+
+    <p>Minimum Salary: {{ salary_stats.minimum_salary }}</p>
+
+    <hr>
+
+    <h2>Department Statistics</h2>
+
+    <ul>
+
+        {% for department in department_stats %}
+
+            <li>
+                {{ department.name }}
+                :
+                {{ department.employee_count }}
+                employees
+            </li>
+
+        {% empty %}
+
+            <li>No departments found.</li>
+
+        {% endfor %}
+
+    </ul>
+
+</body>
+
+</html>

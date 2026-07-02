@@ -27,7 +27,10 @@ SECRET_KEY = 'django-insecure--v3ov$9@ve(_p!gejs&=1kgiu3j7y)%0eybbz2^6dylfh+_)kd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+     '127.0.0.1',
+    'localhost',
+]
 
 
 # Application definition
@@ -39,19 +42,32 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-     'employees.apps.EmployeesConfig',
+    'employees.apps.EmployeesConfig',
     'departments.apps.DepartmentsConfig',  
     'accounts',
+    'audit_logs',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
+
     'django.middleware.common.CommonMiddleware',
+
     'django.middleware.csrf.CsrfViewMiddleware',
+
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
     'django.contrib.messages.middleware.MessageMiddleware',
+
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'employees.middleware.IPRestrictionMiddleware',
+
+    'employees.middleware.ResponseTimeMiddleware',
+
+    'employees.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'company_portal.urls'
@@ -59,7 +75,7 @@ ROOT_URLCONF = 'company_portal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,3 +144,55 @@ AUTH_USER_MODEL = 'accounts.User'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = 'admin@companyportal.com'
+LOGGING = {
+
+    "version": 1,
+
+    "disable_existing_loggers": False,
+
+    "handlers": {
+
+        "application_file": {
+            "class": "logging.FileHandler",
+            "filename": "logs/application.log",
+        },
+
+        "error_file": {
+            "class": "logging.FileHandler",
+            "filename": "logs/error.log",
+        },
+
+        "security_file": {
+            "class": "logging.FileHandler",
+            "filename": "logs/security.log",
+        },
+
+        "request_file": {
+            "class": "logging.FileHandler",
+            "filename": "logs/request.log",
+        },
+    },
+
+    "loggers": {
+
+        "application": {
+            "handlers": ["application_file"],
+            "level": "INFO",
+        },
+
+        "security": {
+            "handlers": ["security_file"],
+            "level": "WARNING",
+        },
+
+        "request": {
+            "handlers": ["request_file"],
+            "level": "INFO",
+        },
+
+        "django": {
+            "handlers": ["error_file"],
+            "level": "ERROR",
+        },
+    },
+}
