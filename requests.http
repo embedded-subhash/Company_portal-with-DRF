@@ -1,0 +1,126 @@
+### HRMS REST API — sample requests (use with the VS Code "REST Client" extension)
+@baseUrl = http://127.0.0.1:8000/api/v1
+@baseUrlV2 = http://127.0.0.1:8000/api/v2
+
+### Login as admin
+# @name login
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Admin@12345"
+}
+
+### Save the token from the login response above into this variable manually,
+### or use the REST Client's response variable feature.
+@token = PASTE_TOKEN_HERE
+
+### List employees (paginated, filterable, searchable, orderable)
+GET {{baseUrl}}/employees/?ordering=-salary
+Authorization: Token {{token}}
+
+### Filter by department + salary range
+GET {{baseUrl}}/employees/?department=Engineering&salary__gte=50000
+Authorization: Token {{token}}
+
+### Search employees
+GET {{baseUrl}}/employees/?search=Ajay
+Authorization: Token {{token}}
+
+### Retrieve single employee
+GET {{baseUrl}}/employees/1/
+Authorization: Token {{token}}
+
+### Create employee
+POST {{baseUrl}}/employees/
+Authorization: Token {{token}}
+Content-Type: application/json
+
+{
+  "employee_id": "EMP00010",
+  "first_name": "Neha",
+  "last_name": "Rao",
+  "email": "neha.rao@example.com",
+  "phone": "9998887771",
+  "department_id": 1,
+  "designation": "Backend Developer",
+  "salary": 65000,
+  "joining_date": "2024-02-01",
+  "status": "active"
+}
+
+### Update employee (partial)
+PATCH {{baseUrl}}/employees/1/
+Authorization: Token {{token}}
+Content-Type: application/json
+
+{
+  "salary": 90000
+}
+
+### Delete employee
+DELETE {{baseUrl}}/employees/2/
+Authorization: Token {{token}}
+
+### Bulk create
+POST {{baseUrl}}/employees/bulk-create/
+Authorization: Token {{token}}
+Content-Type: application/json
+
+[
+  { "employee_id": "EMP00011", "first_name": "A", "last_name": "B", "email": "a.b@example.com", "phone": "9000000001", "department_id": 1, "designation": "Intern", "salary": 20000, "joining_date": "2024-06-01", "status": "active" },
+  { "employee_id": "EMP00012", "first_name": "C", "last_name": "D", "email": "c.d@example.com", "phone": "9000000002", "department_id": 1, "designation": "Intern", "salary": 20000, "joining_date": "2024-06-01", "status": "active" }
+]
+
+### Bulk update
+PATCH {{baseUrl}}/employees/bulk-update/
+Authorization: Token {{token}}
+Content-Type: application/json
+
+[
+  { "id": 1, "salary": 95000 },
+  { "id": 3, "designation": "Senior QA Engineer" }
+]
+
+### Bulk delete
+POST {{baseUrl}}/employees/bulk-delete/
+Authorization: Token {{token}}
+Content-Type: application/json
+
+{ "ids": [5, 6] }
+
+### Own profile (view/update)
+GET {{baseUrl}}/employees/profile/me/
+Authorization: Token {{token}}
+
+### Dashboard stats
+GET {{baseUrl}}/dashboard/stats/
+Authorization: Token {{token}}
+
+### Departments CRUD
+GET {{baseUrl}}/departments/
+Authorization: Token {{token}}
+
+### Audit logs (admin only, 50/page)
+GET {{baseUrl}}/audit-logs/
+Authorization: Token {{token}}
+
+### API v2 — richer employee data
+GET {{baseUrlV2}}/employees/
+Authorization: Token {{token}}
+
+### Change password
+POST {{baseUrl}}/auth/change-password/
+Authorization: Token {{token}}
+Content-Type: application/json
+
+{
+  "old_password": "Admin@12345",
+  "new_password": "NewAdmin@123",
+  "confirm_password": "NewAdmin@123"
+}
+
+### Logout
+POST {{baseUrl}}/auth/logout/
+Authorization: Token {{token}}
