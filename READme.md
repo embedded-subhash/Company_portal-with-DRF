@@ -1,181 +1,332 @@
-# Django HR Management System
+# Company Portal - Secure HRMS REST API
 
-## Overview
-
-Django HR Management System is a professional Employee Management Portal developed using Django and PostgreSQL. The application provides role-based access control, employee management, department management, authentication, authorization, dashboard analytics, password management, and profile management.
+A Django REST Framework based Enterprise HRMS backend implementing secure JWT Authentication, Role-Based Access Control, Password Management, API Security, and Enterprise REST API architecture.
 
 ---
 
-## Features
+## Tech Stack
 
-### Authentication & Authorization
-
-* Custom User Model
-* Email-based Authentication
-* User Registration
-* Login & Logout
-* Role-Based Access Control (RBAC)
-* Dynamic Permission Assignment
-
-### User Roles
-
-* Admin
-* HR
-* Manager
-* Employee
-
-### Employee Management
-
-* Create Employee
-* View Employee
-* Update Employee
-* Delete Employee
-* Search Employees
-* Employee Status Management
-* Pagination Support
-
-### Department Management
-
-* Create Department
-* Update Department
-* Delete Department
-* Department Listing
-
-### Dashboards
-
-#### Admin Dashboard
-
-* Total Users
-* Total Employees
-* Total Departments
-* Active Users
-
-#### HR Dashboard
-
-* Employee Statistics
-* Active Employees
-* Inactive Employees
-
-#### Employee Dashboard
-
-* Personal Profile
-* Employee Information
-* Department Details
-
-### Password Management
-
-* Change Password
-* Forgot Password
-* Password Reset Workflow
-
-### Profile Management
-
-* Profile Image Upload
-* Update Personal Details
-* Update Contact Information
+- Python 3.x
+- Django 6
+- Django REST Framework
+- PostgreSQL
+- Simple JWT
+- Postman
+- Git
 
 ---
 
-## Technology Stack
+# Project Structure
 
-* Python
-* Django
-* PostgreSQL
-* HTML5
-* CSS3
-* Bootstrap
-* Git & GitHub
-
----
-
-## Project Structure
-
+```
 company_portal/
-
+│
 ├── accounts/
-
+├── api/
 ├── employees/
-
 ├── departments/
-
+├── logs/
 ├── media/
-
-├── templates/
-
-├── static/
-
+├── company_portal/
 ├── manage.py
-
 └── requirements.txt
+```
 
 ---
 
-## Installation
+# Features
 
-### Clone Repository
+## Authentication
 
-git clone https://github.com/your-username/django-hr-management-system.git
+- JWT Login
+- JWT Access Token
+- JWT Refresh Token
+- Secure Authentication
+- Custom User Model
+- Email Login
 
-cd django-hr-management-system
+---
 
-### Create Virtual Environment
+## Employee Management
 
+- Employee CRUD
+- Department Management
+- Profile Image Upload
+
+---
+
+## Security
+
+- JWT Authentication
+- Password Hashing
+- Authentication Required APIs
+- Role-based User Model
+
+---
+
+# Authentication Flow
+
+```
+User Login
+    │
+    ▼
+Validate Credentials
+    │
+    ▼
+Generate Access Token
+Generate Refresh Token
+    │
+    ▼
+Access Protected APIs
+    │
+Access Token Expired
+    │
+    ▼
+Refresh Token
+    │
+    ▼
+Generate New Access Token
+```
+
+---
+
+# API Endpoints
+
+## Login
+
+POST
+
+```
+/api/v1/auth/login/
+```
+
+Body
+
+```json
+{
+    "email":"hr@gmail.com",
+    "password":"Hr@12345"
+}
+```
+
+Response
+
+```json
+{
+    "access":"<JWT_ACCESS_TOKEN>",
+    "refresh":"<JWT_REFRESH_TOKEN>",
+    "user":{
+        "id":1,
+        "email":"hr@gmail.com",
+        "role":"HR"
+    }
+}
+```
+
+---
+
+## Refresh Token
+
+POST
+
+```
+/api/v1/auth/refresh/
+```
+
+Body
+
+```json
+{
+    "refresh":"<JWT_REFRESH_TOKEN>"
+}
+```
+
+Response
+
+```json
+{
+    "access":"<NEW_ACCESS_TOKEN>"
+}
+```
+
+---
+
+# Authentication
+
+Protected APIs require
+
+```
+Authorization: Bearer <ACCESS_TOKEN>
+```
+
+Example
+
+```
+Authorization: Bearer eyJhbGciOi...
+```
+
+---
+
+# User Roles
+
+- ADMIN
+- HR
+- MANAGER
+- EMPLOYEE
+
+---
+
+# Installation
+
+Clone Repository
+
+```bash
+git clone <repository-url>
+```
+
+Create Virtual Environment
+
+```bash
 python -m venv .venv
+```
 
-### Activate Environment
+Activate
 
 Windows
 
+```bash
 .venv\Scripts\activate
+```
 
-### Install Dependencies
+Install Requirements
 
+```bash
 pip install -r requirements.txt
-
-### Database Migration
-
-python manage.py makemigrations
-
-python manage.py migrate
-
-### Create Superuser
-
-python manage.py createsuperuser
-
-### Run Server
-
-python manage.py runserver
+```
 
 ---
 
-## Git Workflow
+# Database
 
+Create PostgreSQL Database
+
+```
+company_db
+```
+
+Run Migrations
+
+```bash
+python manage.py makemigrations
+
+python manage.py migrate
+```
+
+Create Superuser
+
+```bash
+python manage.py createsuperuser
+```
+
+Run Server
+
+```bash
+python manage.py runserver
+```
+
+---
+
+# Testing
+
+Login API
+
+```
+POST
+
+http://127.0.0.1:8000/api/v1/auth/login/
+```
+
+Refresh API
+
+```
+POST
+
+http://127.0.0.1:8000/api/v1/auth/refresh/
+```
+
+---
+
+# JWT Configuration
+
+Access Token Lifetime
+
+```
+60 Minutes
+```
+
+Refresh Token Lifetime
+
+```
+7 Days
+```
+
+---
+
+# Completed Modules
+
+- Custom User Model
+- Email Authentication
+- JWT Login API
+- JWT Access Token
+- JWT Refresh Token
+- Refresh API
+- Employee CRUD
+- Department CRUD
+- PostgreSQL Integration
+
+---
+
+# Upcoming Features
+
+- Logout API
+- Token Blacklisting
+- Change Password API
+- Forgot Password API
+- Reset Password API
+- Custom Permissions
+- Object Level Permissions
+- API Rate Limiting
+- Secure File Upload
+- Security Logging
+- HTTPS Configuration
+- Audit Logs
+
+---
+
+# Git Workflow
+
+```bash
 git checkout development
 
 git pull origin development
 
-git checkout -b feature/authentication-rbac
+git checkout -b feature/jwt-api-security
+```
+
+Commit
+
+```bash
+git add .
+
+git commit -m "feat: implement JWT authentication"
+```
 
 ---
 
-## Screenshots
+# Author
 
-* Registration Page
-* Login Page
-* Dashboard
-* RBAC Implementation
-* Admin Panel
+**Subhash**
 
----
+Software Engineer L1
 
-## Author
-
-Subhash
-
-Software Engineer | Embedded Systems & Django Developer
-
----
-
-## License
-
-This project is developed for educational and professional learning purposes.
+Blackroth
