@@ -5,12 +5,27 @@ from django.contrib.auth.models import BaseUserManager
 
 class UserManager(BaseUserManager):
 
+    def _generate_employee_id(self):
+        existing_ids = set(
+            self.model.objects.values_list('employee_id', flat=True)
+        )
+        counter = 1
+        while True:
+            candidate = f'EMP{counter:05d}'
+            if candidate not in existing_ids:
+                return candidate
+            counter += 1
+
     def create_user(self, email, password=None, **extra_fields):
 
         if not email:
             raise ValueError("Email is required")
 
         email = self.normalize_email(email)
+
+        extra_fields.setdefault('employee_id', self._generate_employee_id())
+        extra_fields.setdefault('phone', '0000000000')
+        extra_fields.setdefault('role', 'EMPLOYEE')
 
         user = self.model(
             email=email,
@@ -27,6 +42,8 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('phone', '0000000000')
+        extra_fields.setdefault('role', 'ADMIN')
 
         return self.create_user(
             email=email,

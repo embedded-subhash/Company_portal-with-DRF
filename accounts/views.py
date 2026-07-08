@@ -11,6 +11,10 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from departments.models import Department
 from .forms import ProfileUpdateForm
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 def register(request):
 
     if request.method == 'POST':
@@ -338,3 +342,62 @@ def edit_profile(request):
             'form': form
         }
     )
+
+class APILoginView(APIView):
+    """
+    REST API login endpoint. Returns JWT access and refresh tokens.
+    POST /api/v1/auth/login/
+    Body: { "email": "...", "password": "..." }
+    """
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        print("=" * 50)
+        print("APILoginView Called")
+        print("Request Data:", request.data)
+
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        print("Email:", email)
+        print("Password:", password)
+
+        user = authenticate(
+            request,
+            username=email,
+            password=password
+        )
+
+        print("Authenticated User:", user)
+        print("=" * 50)
+
+        if not email or not password:
+            return Response(
+                {"error": "Email and password are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if user is None:
+            return Response(
+                {"error": "Invalid email or password."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        if not user.is_active:
+            return Response(
+                {"error": "Account is disabled."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "role": user.role,
+            }
+        })

@@ -1,4 +1,4 @@
-from django.contrib import admin
+﻿from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
@@ -33,6 +33,11 @@ urlpatterns = [
     path(
        'departments/',
         include('departments.urls')
+    ),
+
+    path(
+        'api/',
+        include('api.urls')
     ),
 ]
 

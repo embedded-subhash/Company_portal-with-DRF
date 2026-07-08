@@ -1,0 +1,129 @@
+### Company Portal - Secure HRMS API
+### REST Client test file (VS Code "REST Client" extension)
+@baseUrl = http://127.0.0.1:8000/api/v1
+@adminUser = admin_user
+@hrUser = hr_user
+@managerUser = manager_user
+@employeeUser = employee_user
+@password = Str0ngP@ssw0rd!
+
+### ==================== MODULE 1: JWT AUTH ====================
+
+### Login (Admin)
+# @name loginAdmin
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+  "username": "{{adminUser}}",
+  "password": "{{password}}"
+}
+
+###
+@adminAccess = {{loginAdmin.response.body.access}}
+@adminRefresh = {{loginAdmin.response.body.refresh}}
+
+### Login (Employee)
+# @name loginEmployee
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+  "username": "{{employeeUser}}",
+  "password": "{{password}}"
+}
+
+###
+@employeeAccess = {{loginEmployee.response.body.access}}
+@employeeRefresh = {{loginEmployee.response.body.refresh}}
+
+### Refresh token
+POST {{baseUrl}}/auth/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "{{adminRefresh}}"
+}
+
+### ==================== MODULE 2: LOGOUT / BLACKLIST ====================
+
+### Logout (blacklists the refresh token)
+POST {{baseUrl}}/auth/logout/
+Authorization: Bearer {{adminAccess}}
+Content-Type: application/json
+
+{
+  "refresh": "{{adminRefresh}}"
+}
+
+### ==================== MODULE 3: CHANGE PASSWORD ====================
+
+POST {{baseUrl}}/auth/change-password/
+Authorization: Bearer {{adminAccess}}
+Content-Type: application/json
+
+{
+  "current_password": "Str0ngP@ssw0rd!",
+  "new_password": "N3wStrongPass!23"
+}
+
+### ==================== MODULE 4: FORGOT / RESET PASSWORD ====================
+
+POST {{baseUrl}}/auth/forgot-password/
+Content-Type: application/json
+
+{
+  "email": "hr@company-portal.local"
+}
+
+###
+POST {{baseUrl}}/auth/reset-password/
+Content-Type: application/json
+
+{
+  "token": "PASTE_TOKEN_FROM_CONSOLE_EMAIL_HERE",
+  "new_password": "AnotherStrongPass!45"
+}
+
+### ==================== MODULE 5/6: RBAC + OBJECT-LEVEL PERMS ====================
+
+### Employee reads OWN profile - 200
+GET {{baseUrl}}/employees/profile/
+Authorization: Bearer {{employeeAccess}}
+
+### Employee tries to list ALL employees - 403 (HR/Admin only)
+GET {{baseUrl}}/employees/
+Authorization: Bearer {{employeeAccess}}
+
+### Admin lists all employees - 200
+GET {{baseUrl}}/employees/
+Authorization: Bearer {{adminAccess}}
+
+### ==================== MODULE 7: RATE LIMITING ====================
+### Hit this 6+ times quickly to see 429 Too Many Requests (5/min limit)
+
+POST {{baseUrl}}/auth/login/
+Content-Type: application/json
+
+{
+  "username": "{{adminUser}}",
+  "password": "wrong-password"
+}
+
+### ==================== MODULE 8: SECURE FILE UPLOAD ====================
+### Use a REST Client multipart request or curl -F for actual file upload testing.
+### See README.md for the exact curl commands used to validate this.
+
+### ==================== MODULE 10: SECURITY LOGGING ====================
+
+GET {{baseUrl}}/logs/?action=LOGIN_FAILURE
+Authorization: Bearer {{adminAccess}}
+
+### ==================== MODULE 12: DASHBOARD / REPORTS ====================
+
+GET {{baseUrl}}/dashboard/
+Authorization: Bearer {{managerUser}}
+
+###
+GET {{baseUrl}}/reports/salary/
+Authorization: Bearer {{adminAccess}}
