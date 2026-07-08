@@ -16,25 +16,30 @@ ALLOWED_HOSTS = ["*"]
 # Applications
 # ---------------------------------------------------------------------------
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-
-    # 3rd party
-    "rest_framework",
-    "rest_framework.authtoken",
-    "django_filters",
-
-    # local apps
-    "accounts",
-    "employees",
-    "departments",
-    "reports",
-    "api",
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+     'employees.apps.EmployeesConfig',
+    'departments.apps.DepartmentsConfig',  
+    'accounts',
+    'rest_framework',
+    'logs.apps.LogsConfig',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
