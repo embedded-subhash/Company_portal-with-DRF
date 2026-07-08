@@ -1,0 +1,18 @@
+$kind: http-request
+name: http://127.0.0.1:8000/api/employees/
+url: http://127.0.0.1:8000/api/employees/
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"Subash@blackroth.in\",\r
+
+    \    \"password\": \"Admin@123\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_025h}}"
+order: 1259317762196896

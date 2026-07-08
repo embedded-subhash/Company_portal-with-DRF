@@ -1,0 +1,8 @@
+$kind: collection
+name: Company Portal API
+variables:
+  - key: base_url
+    value: http://127.0.0.1:8000
+    secret: false
+  - key: json_web_token_025h
+    secret: true

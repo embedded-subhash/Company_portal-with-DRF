@@ -1,4 +1,5 @@
 import django.db.models.deletion
+from django.conf import settings
 from django.db import migrations, models
 
 
@@ -7,35 +8,40 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('departments', '0001_initial'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Department',
+            name='Skill',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('name', models.CharField(max_length=100, unique=True)),
             ],
         ),
         migrations.CreateModel(
             name='Employee',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('employee_id', models.CharField(max_length=20, unique=True)),
+                ('employee_id', models.CharField(help_text='Format: EMP00001', max_length=10, unique=True, validators=[django.core.validators.RegexValidator(message='Employee ID must be in the format EMP00001 (EMP followed by 5 digits).', regex='^EMP\\d{5}$')])),
                 ('first_name', models.CharField(max_length=100)),
                 ('last_name', models.CharField(max_length=100)),
                 ('email', models.EmailField(max_length=254, unique=True)),
-                ('phone', models.CharField(max_length=15)),
-                ('salary', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('phone', models.CharField(max_length=10, validators=[django.core.validators.RegexValidator(message='Phone number must be exactly 10 digits.', regex='^\\d{10}$')])),
+                ('designation', models.CharField(blank=True, max_length=100)),
+                ('salary', models.DecimalField(decimal_places=2, max_digits=12)),
                 ('joining_date', models.DateField()),
-                ('designation', models.CharField(max_length=100)),
-                ('status', models.BooleanField(default=True)),
+                ('status', models.CharField(choices=[('active', 'Active'), ('inactive', 'Inactive')], default='active', max_length=10)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='employees.department')),
+                ('department', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='employees', to='departments.department')),
+                ('manager', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='team_members', to='employees.employee')),
+                ('user', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='employee_profile', to=settings.AUTH_USER_MODEL)),
+                ('skills', models.ManyToManyField(blank=True, related_name='employees', to='employees.skill')),
             ],
+            options={
+                'ordering': ['-created_at'],
+            },
         ),
     ]
