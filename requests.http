@@ -1,129 +1,103 @@
-### Company Portal - Secure HRMS API
-### REST Client test file (VS Code "REST Client" extension)
+### Variables
 @baseUrl = http://127.0.0.1:8000/api/v1
-@adminUser = admin_user
-@hrUser = hr_user
-@managerUser = manager_user
-@employeeUser = employee_user
-@password = Str0ngP@ssw0rd!
+@auth = Basic YWRtaW46YWRtaW4xMjM0NQ==
 
-### ==================== MODULE 1: JWT AUTH ====================
+### -------- Module 1/2: Employees & Documents --------
 
-### Login (Admin)
-# @name loginAdmin
-POST {{baseUrl}}/auth/login/
-Content-Type: application/json
-
-{
-  "username": "{{adminUser}}",
-  "password": "{{password}}"
-}
-
-###
-@adminAccess = {{loginAdmin.response.body.access}}
-@adminRefresh = {{loginAdmin.response.body.refresh}}
-
-### Login (Employee)
-# @name loginEmployee
-POST {{baseUrl}}/auth/login/
-Content-Type: application/json
-
-{
-  "username": "{{employeeUser}}",
-  "password": "{{password}}"
-}
-
-###
-@employeeAccess = {{loginEmployee.response.body.access}}
-@employeeRefresh = {{loginEmployee.response.body.refresh}}
-
-### Refresh token
-POST {{baseUrl}}/auth/refresh/
-Content-Type: application/json
-
-{
-  "refresh": "{{adminRefresh}}"
-}
-
-### ==================== MODULE 2: LOGOUT / BLACKLIST ====================
-
-### Logout (blacklists the refresh token)
-POST {{baseUrl}}/auth/logout/
-Authorization: Bearer {{adminAccess}}
-Content-Type: application/json
-
-{
-  "refresh": "{{adminRefresh}}"
-}
-
-### ==================== MODULE 3: CHANGE PASSWORD ====================
-
-POST {{baseUrl}}/auth/change-password/
-Authorization: Bearer {{adminAccess}}
-Content-Type: application/json
-
-{
-  "current_password": "Str0ngP@ssw0rd!",
-  "new_password": "N3wStrongPass!23"
-}
-
-### ==================== MODULE 4: FORGOT / RESET PASSWORD ====================
-
-POST {{baseUrl}}/auth/forgot-password/
-Content-Type: application/json
-
-{
-  "email": "hr@company-portal.local"
-}
-
-###
-POST {{baseUrl}}/auth/reset-password/
-Content-Type: application/json
-
-{
-  "token": "PASTE_TOKEN_FROM_CONSOLE_EMAIL_HERE",
-  "new_password": "AnotherStrongPass!45"
-}
-
-### ==================== MODULE 5/6: RBAC + OBJECT-LEVEL PERMS ====================
-
-### Employee reads OWN profile - 200
-GET {{baseUrl}}/employees/profile/
-Authorization: Bearer {{employeeAccess}}
-
-### Employee tries to list ALL employees - 403 (HR/Admin only)
+### List employees
 GET {{baseUrl}}/employees/
-Authorization: Bearer {{employeeAccess}}
+Authorization: {{auth}}
 
-### Admin lists all employees - 200
-GET {{baseUrl}}/employees/
-Authorization: Bearer {{adminAccess}}
+### Get single employee
+GET {{baseUrl}}/employees/1/
+Authorization: {{auth}}
 
-### ==================== MODULE 7: RATE LIMITING ====================
-### Hit this 6+ times quickly to see 429 Too Many Requests (5/min limit)
+### List documents for an employee
+GET {{baseUrl}}/documents/?employee=1
+Authorization: {{auth}}
 
-POST {{baseUrl}}/auth/login/
+### Download a document (Module 2 / 11)
+GET {{baseUrl}}/documents/1/download/
+Authorization: {{auth}}
+
+### -------- Module 3: Excel Import --------
+
+### Import employees from Excel (multipart - use REST Client's file picker or curl)
+POST {{baseUrl}}/employees/import/
+Authorization: {{auth}}
+
+### -------- Module 4: Excel Export --------
+
+### Export employee list
+GET {{baseUrl}}/employees/export/?type=employees
+Authorization: {{auth}}
+
+### Export department list
+GET {{baseUrl}}/employees/export/?type=departments
+Authorization: {{auth}}
+
+### Export salary report
+GET {{baseUrl}}/employees/export/?type=salary
+Authorization: {{auth}}
+
+### Export attendance report
+GET {{baseUrl}}/employees/export/?type=attendance
+Authorization: {{auth}}
+
+### -------- Module 5: CSV Import/Export --------
+
+### Export employees as CSV
+GET {{baseUrl}}/employees/export-csv/
+Authorization: {{auth}}
+
+### -------- Module 6/7/8/9: PDF, Salary Slip, QR, ID Card --------
+
+### Employee profile PDF
+GET {{baseUrl}}/employees/1/profile-pdf/
+Authorization: {{auth}}
+
+### Salary slip PDF
+GET {{baseUrl}}/employees/1/salary-slip/?month=June&year=2026
+Authorization: {{auth}}
+
+### QR code (PNG)
+GET {{baseUrl}}/employees/1/qr-code/
+Authorization: {{auth}}
+
+### Employee ID card PDF
+GET {{baseUrl}}/employees/1/id-card/
+Authorization: {{auth}}
+
+### -------- Module 10/11: Reports --------
+
+### Generate a report (POST body: report_type + format)
+POST {{baseUrl}}/reports/generate/
+Authorization: {{auth}}
 Content-Type: application/json
 
 {
-  "username": "{{adminUser}}",
-  "password": "wrong-password"
+  "report_type": "SALARY",
+  "format": "PDF"
 }
 
-### ==================== MODULE 8: SECURE FILE UPLOAD ====================
-### Use a REST Client multipart request or curl -F for actual file upload testing.
-### See README.md for the exact curl commands used to validate this.
+### List generated reports
+GET {{baseUrl}}/reports/
+Authorization: {{auth}}
 
-### ==================== MODULE 10: SECURITY LOGGING ====================
+### Download a generated report by id
+GET {{baseUrl}}/reports/1/download/
+Authorization: {{auth}}
 
-GET {{baseUrl}}/logs/?action=LOGIN_FAILURE
-Authorization: Bearer {{adminAccess}}
+### -------- Module 12: Dashboard --------
 
-### ==================== MODULE 12: DASHBOARD / REPORTS ====================
-
+### Dashboard summary (JSON)
 GET {{baseUrl}}/dashboard/
-Authorization: Bearer {{managerUser}}
+Authorization: {{auth}}
 
-###
-GET {{baseUrl}}/reports/salary/
-Authorization: Bearer {{adminAccess}}
+### Dashboard export - PDF
+GET {{baseUrl}}/dashboard/export/?file_format=PDF
+Authorization: {{auth}}
+
+### Dashboard export - Excel
+GET {{baseUrl}}/dashboard/export/?file_format=EXCEL
+Authorization: {{auth}}

@@ -1,40 +1,10 @@
-from django.urls import path
-from .views import (
-    EmployeeCreateView,
-    EmployeeListView,
-    EmployeeDetailView,
-    EmployeeUpdateView,
-    EmployeeDeleteView
-)
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path(
-        '',
-        EmployeeListView.as_view(),
-        name='employee_list'
-    ),
+from .views import AttendanceViewSet, DepartmentViewSet, EmployeeViewSet
 
-    path(
-        'create/',
-        EmployeeCreateView.as_view(),
-        name='employee_create'
-    ),
+router = DefaultRouter()
+router.register("employees", EmployeeViewSet, basename="employee")
+router.register("departments", DepartmentViewSet, basename="department")
+router.register("attendance", AttendanceViewSet, basename="attendance")
 
-    path(
-        '<int:pk>/',
-        EmployeeDetailView.as_view(),
-        name='employee_detail'
-    ),
-
-    path(
-        'update/<int:pk>/',
-        EmployeeUpdateView.as_view(),
-        name='employee_update'
-    ),
-
-    path(
-        'delete/<int:pk>/',
-        EmployeeDeleteView.as_view(),
-        name='employee_delete'
-    ),
-]
+urlpatterns = router.urls

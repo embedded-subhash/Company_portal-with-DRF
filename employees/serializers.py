@@ -1,45 +1,55 @@
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from accounts.validators import (
-    validate_employee_id, validate_phone_number, validate_salary,
-    validate_joining_date, validate_profile_image,
-)
-from .models import Employee
+from .models import Attendance, Department, Employee
 
-User = get_user_model()
+
+class DepartmentSerializer(serializers.ModelSerializer):
+    employee_count = serializers.IntegerField(source="employees.count", read_only=True)
+
+    class Meta:
+        model = Department
+        fields = ["id", "name", "code", "employee_count"]
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source="user.username", read_only=True)
-    email = serializers.EmailField(source="user.email", read_only=True)
-    phone = serializers.CharField(source="user.phone", validators=[validate_phone_number], required=False)
-    employee_id = serializers.CharField(validators=[validate_employee_id])
-    salary = serializers.DecimalField(max_digits=12, decimal_places=2, validators=[validate_salary])
-    joining_date = serializers.DateField(validators=[validate_joining_date])
+    full_name = serializers.CharField(read_only=True)
+    department_name = serializers.CharField(source="department.name", read_only=True)
 
     class Meta:
         model = Employee
         fields = [
-            "id", "user", "username", "email", "phone", "employee_id", "department",
-            "designation", "salary", "joining_date", "profile_image", "created_at", "updated_at",
+            "id", "employee_id", "first_name", "last_name", "full_name", "email", "phone",
+            "department", "department_name", "designation", "salary", "joining_date", "status",
+            "profile_photo", "resume", "aadhaar_document", "pan_document",
+            "created_at", "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at"]
-        extra_kwargs = {"user": {"write_only": True}}
-
-    def update(self, instance, validated_data):
-        user_data = validated_data.pop("user", None)
-        if user_data and "phone" in user_data:
-            instance.user.phone = user_data["phone"]
-            instance.user.save(update_fields=["phone"])
-        return super().update(instance, validated_data)
+        read_only_fields = ["created_at", "updated_at"]
 
 
-class ProfileImageUploadSerializer(serializers.Serializer):
-    profile_image = serializers.ImageField(validators=[validate_profile_image])
+class EmployeeSelfServiceSerializer(serializers.ModelSerializer):
+    """Restricted serializer for the IsEmployeeReadOnlySelf role - salary/status not writable."""
+    full_name = serializers.CharField(read_only=True)
 
-    def save(self, **kwargs):
-        employee = self.context["employee"]
-        employee.profile_image = self.validated_data["profile_image"]
-        employee.save(update_fields=["profile_image", "updated_at"])
-        return employee
+    class Meta:
+        model = Employee
+        fields = [
+            "id", "employee_id", "first_name", "last_name", "full_name", "email", "phone",
+            "department", "designation", "salary", "joining_date", "status",
+            "profile_photo", "resume", "aadhaar_document", "pan_document",
+        ]
+        read_only_fields = ["employee_id", "department", "designation", "salary", "joining_date", "status"]
+
+
+class AttendanceSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source="employee.full_name", read_only=True)
+
+    class Meta:
+        model = Attendance
+        fields = ["id", "employee", "employee_name", "date", "status"]
+
+
+class ExcelImportResultSerializer(serializers.Serializer):
+    total_rows = serializers.IntegerField()
+    created = serializers.IntegerField()
+    failed = serializers.IntegerField()
+    errors = serializers.ListField(child=serializers.CharField())

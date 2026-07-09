@@ -1,175 +1,148 @@
-from django.contrib import messages
-from django.urls import reverse_lazy
-from django.db.models import Q
-from django.shortcuts import redirect
+from datetime import date
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import (
-    CreateView,
-    ListView,
-    DetailView,
-    UpdateView,
-    DeleteView
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.http import HttpResponse, FileResponse
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from reports import csv_handler, excel_export, pdf_generator, qr_generator
+from .models import Attendance, Department, Employee
+from .permissions import IsAdminOrHR, IsEmployeeReadOnlySelf
+from .serializers import (
+    AttendanceSerializer,
+    DepartmentSerializer,
+    EmployeeSelfServiceSerializer,
+    EmployeeSerializer,
+    ExcelImportResultSerializer,
 )
 
-from .models import Employee
-from .forms import EmployeeForm
+
+class DepartmentViewSet(viewsets.ModelViewSet):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+    permission_classes = [IsAdminOrHR]
 
 
-class EmployeePermissionMixin(LoginRequiredMixin):
+class EmployeeViewSet(viewsets.ModelViewSet):
+    """
+    Full CRUD for HR/Admin. Employees hitting their own record get a
+    restricted read-mostly view (enforced via get_serializer_class + object perm).
+    """
+    queryset = Employee.objects.select_related("department").all()
+    filterset_fields = ["department", "status", "designation"]
+    search_fields = ["employee_id", "first_name", "last_name", "email"]
 
-    required_permission = None
+    def get_permissions(self):
+        if self.action in ("list", "create", "destroy", "import_excel", "export_excel", "export_csv"):
+            return [IsAdminOrHR()]
+        return [IsAuthenticated(), IsEmployeeReadOnlySelf()]
 
-    def dispatch(self, request, *args, **kwargs):
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_authenticated and not (user.is_superuser or user.groups.filter(name__in=["Admin", "HR"]).exists()):
+            return EmployeeSelfServiceSerializer
+        return EmployeeSerializer
 
-        if request.user.role == 'ADMIN':
-            return super().dispatch(request, *args, **kwargs)
+    # -------------------- Module 3: Excel Import --------------------
+    @action(detail=False, methods=["post"], url_path="import")
+    def import_excel(self, request):
+        file_obj = request.FILES.get("file")
+        if not file_obj:
+            return Response({"detail": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+        result = excel_export.import_employees_from_excel(file_obj)
+        return Response(ExcelImportResultSerializer(result).data, status=status.HTTP_201_CREATED)
 
-        if self.required_permission:
+    # -------------------- Module 4: Excel Export --------------------
+    @action(detail=False, methods=["get"], url_path="export")
+    def export_excel(self, request):
+        export_type = request.query_params.get("type", "employees")
+        builders = {
+            "employees": (excel_export.export_employee_list_excel, self.filter_queryset(self.get_queryset()), "employee_list.xlsx"),
+            "departments": (excel_export.export_department_list_excel, Department.objects.all(), "department_list.xlsx"),
+            "salary": (excel_export.export_salary_report_excel, self.filter_queryset(self.get_queryset()), "salary_report.xlsx"),
+            "attendance": (excel_export.export_attendance_report_excel, Attendance.objects.select_related("employee"), "attendance_report.xlsx"),
+        }
+        if export_type not in builders:
+            return Response({"detail": f"Unknown export type '{export_type}'."}, status=status.HTTP_400_BAD_REQUEST)
+        builder_fn, queryset, filename = builders[export_type]
+        content = builder_fn(queryset)
+        response = HttpResponse(content, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
 
-            if not request.user.has_perm(
-                self.required_permission
-            ):
-                messages.error(
-                    request,
-                    "You do not have permission."
-                )
-                return redirect('dashboard')
+    # -------------------- Module 5: CSV Import/Export --------------------
+    @action(detail=False, methods=["post"], url_path="import-csv")
+    def import_csv(self, request):
+        file_obj = request.FILES.get("file")
+        if not file_obj:
+            return Response({"detail": "No file uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+        result = csv_handler.parse_employee_csv(file_obj)
+        return Response(ExcelImportResultSerializer(result).data, status=status.HTTP_201_CREATED)
 
-        return super().dispatch(
-            request,
-            *args,
-            **kwargs
-        )
+    @action(detail=False, methods=["get"], url_path="export-csv")
+    def export_csv(self, request):
+        content = csv_handler.build_employee_csv(self.filter_queryset(self.get_queryset()))
+        response = HttpResponse(content, content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="employee_list.csv"'
+        return response
 
+    # -------------------- Module 6: Employee Profile PDF --------------------
+    @action(detail=True, methods=["get"], url_path="profile-pdf")
+    def profile_pdf(self, request, pk=None):
+        employee = self.get_object()
+        content = pdf_generator.generate_employee_profile_pdf(employee)
+        response = HttpResponse(content, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{employee.employee_id}_Profile.pdf"'
+        return response
 
-class EmployeeCreateView(
-    EmployeePermissionMixin,
-    CreateView
-):
+    # -------------------- Module 7: Salary Slip PDF --------------------
+    @action(detail=True, methods=["get"], url_path="salary-slip")
+    def salary_slip(self, request, pk=None):
+        employee = self.get_object()
+        month = request.query_params.get("month", date.today().strftime("%B"))
+        year = int(request.query_params.get("year", date.today().year))
+        content = pdf_generator.generate_salary_slip_pdf(employee, month, year)
+        response = HttpResponse(content, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="SalarySlip_{month}_{year}_{employee.employee_id}.pdf"'
+        return response
 
-    required_permission = 'employees.add_employee'
+    # -------------------- Module 8: QR Code --------------------
+    @action(detail=True, methods=["get"], url_path="qr-code")
+    def qr_code(self, request, pk=None):
+        employee = self.get_object()
+        content = qr_generator.generate_employee_qr_png_bytes(employee)
+        response = HttpResponse(content, content_type="image/png")
+        response["Content-Disposition"] = f'inline; filename="{employee.employee_id}_QR.png"'
+        return response
 
-    model = Employee
-    form_class = EmployeeForm
-    template_name = 'employees/create.html'
-    success_url = reverse_lazy('employee_list')
+    # -------------------- Module 9: Employee ID Card --------------------
+    @action(detail=True, methods=["get"], url_path="id-card")
+    def id_card(self, request, pk=None):
+        employee = self.get_object()
+        valid_till = date(date.today().year + 1, date.today().month, 1)
+        content = pdf_generator.generate_employee_id_card_pdf(employee, valid_till)
 
-    def form_valid(self, form):
+        # Persist a copy under media/id_cards/ (Module 9 output folder)
+        filename = f"id_cards/ID_{employee.employee_id}.pdf"
+        if default_storage.exists(filename):
+            default_storage.delete(filename)
+        default_storage.save(filename, ContentFile(content))
 
-        messages.success(
-            self.request,
-            'Employee Created Successfully'
-        )
+        response = HttpResponse(content, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="ID_{employee.employee_id}.pdf"'
+        return response
 
-        return super().form_valid(form)
-
-
-class EmployeeListView(
-    EmployeePermissionMixin,
-    ListView
-):
-
-    required_permission = 'employees.view_employee'
-
-    model = Employee
-    template_name = 'employees/list.html'
-    context_object_name = 'employees'
-    paginate_by = 10
-
-    def get_queryset(self):
-
-        queryset = Employee.objects.all()
-
-        search = self.request.GET.get('search')
-        department = self.request.GET.get('department')
-        status = self.request.GET.get('status')
-
-        if search:
-            queryset = queryset.filter(
-                Q(employee_id__icontains=search) |
-                Q(first_name__icontains=search) |
-                Q(last_name__icontains=search) |
-                Q(email__icontains=search)
-            )
-
-        if department:
-            queryset = queryset.filter(
-                department__name=department
-            )
-
-        if status:
-            queryset = queryset.filter(
-                status=status
-            )
-
-        return queryset
-
-    def get_context_data(self, **kwargs):
-
-        context = super().get_context_data(**kwargs)
-
-        from departments.models import Department
-
-        context['departments'] = Department.objects.all()
-
-        return context
-
-
-class EmployeeDetailView(
-    EmployeePermissionMixin,
-    DetailView
-):
-
-    required_permission = 'employees.view_employee'
-
-    model = Employee
-    template_name = 'employees/detail.html'
-    context_object_name = 'employee'
-
-
-class EmployeeUpdateView(
-    EmployeePermissionMixin,
-    UpdateView
-):
-
-    required_permission = 'employees.change_employee'
-
-    model = Employee
-    form_class = EmployeeForm
-    template_name = 'employees/update.html'
-    success_url = reverse_lazy('employee_list')
-
-    def form_valid(self, form):
-
-        messages.success(
-            self.request,
-            'Employee Updated Successfully'
-        )
-
-        return super().form_valid(form)
+    def get_object(self):
+        obj = super().get_object()
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
-class EmployeeDeleteView(
-    EmployeePermissionMixin,
-    DeleteView
-):
-
-    required_permission = 'employees.delete_employee'
-
-    model = Employee
-    template_name = 'employees/delete.html'
-    success_url = reverse_lazy('employee_list')
-
-    def delete(self, request, *args, **kwargs):
-
-        messages.success(
-            request,
-            'Employee Deleted Successfully'
-        )
-
-        return super().delete(
-            request,
-            *args,
-            **kwargs
-        )
+class AttendanceViewSet(viewsets.ModelViewSet):
+    queryset = Attendance.objects.select_related("employee").all()
+    serializer_class = AttendanceSerializer
+    permission_classes = [IsAdminOrHR]
+    filterset_fields = ["employee", "status", "date"]
