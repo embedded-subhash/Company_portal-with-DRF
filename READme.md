@@ -121,9 +121,3 @@ Every module below was exercised against a running server with seeded data
 - ✅ All 4 report types × 3 formats (12 combinations) generated and downloadable by id
 - ✅ Dashboard JSON + PDF/Excel export
 - ✅ Role enforcement — HR-only actions return 403 for a plain employee; self-service employee view returns only their own restricted record
-
-## Production Notes
-
-- Swap `DATABASES` in `config/settings.py` to the commented-out PostgreSQL block for production.
-- Set `DEBUG = False`, a real `SECRET_KEY`, and proper `ALLOWED_HOSTS` before deploying.
-- `media/` should be served from object storage (S3, etc.) in production rather than local disk.
