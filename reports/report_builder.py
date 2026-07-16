@@ -45,7 +45,7 @@ def department_report_data():
     return list(
         Department.objects.annotate(
             employee_count=Count("employees"), avg_salary=Avg("employees__salary")
-        ).values("name", "code", "employee_count", "avg_salary")
+        ).values("name", "employee_count", "avg_salary")
     )
 
 
@@ -113,7 +113,7 @@ def department_report_pdf():
     rows = department_report_data()
     table = [["Department", "Code", "Employee Count", "Average Salary"]]
     for r in rows:
-        table.append([r["name"], r["code"], r["employee_count"], f"{(r['avg_salary'] or 0):,.2f}"])
+        table.append([r["name"], "-", r["employee_count"], f"{(r['avg_salary'] or 0):,.2f}"])
     return _simple_pdf("Department Report", table, [150, 80, 110, 110])
 
 
@@ -182,7 +182,7 @@ def department_report_excel():
     ws.title = "Department Report"
     _style_ws_header(ws, ["Department", "Code", "Employee Count", "Average Salary"])
     for r in department_report_data():
-        ws.append([r["name"], r["code"], r["employee_count"], round(r["avg_salary"] or 0, 2)])
+        ws.append([r["name"], "-", r["employee_count"], round(r["avg_salary"] or 0, 2)])
     return _wb_bytes(wb)
 
 
@@ -245,7 +245,7 @@ def employee_report_csv():
 
 
 def department_report_csv():
-    rows = [[r["name"], r["code"], r["employee_count"], round(r["avg_salary"] or 0, 2)] for r in department_report_data()]
+    rows = [[r["name"], "-", r["employee_count"], round(r["avg_salary"] or 0, 2)] for r in department_report_data()]
     return _csv_bytes(["Department", "Code", "Employee Count", "Average Salary"], rows)
 
 

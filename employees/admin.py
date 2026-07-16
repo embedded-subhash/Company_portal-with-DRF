@@ -5,7 +5,8 @@ from .models import Attendance, Department, Employee
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ("name", "code")
+    list_display = ("id", "name", "description")
+    search_fields = ("name",)
 
 
 @admin.register(Employee)

@@ -387,7 +387,7 @@ class APILoginView(APIView):
         if not user.is_active:
             return Response(
                 {"error": "Account is disabled."},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
         refresh = RefreshToken.for_user(user)

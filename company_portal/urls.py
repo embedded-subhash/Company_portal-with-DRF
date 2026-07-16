@@ -7,42 +7,48 @@ from django.conf.urls.static import static
 urlpatterns = [
 
     path(
-        '',
+        "",
         RedirectView.as_view(
-            url='/accounts/login/',
-            permanent=False
+            url="/accounts/login/",
+            permanent=False,
         ),
-        name='home'
+        name="home",
     ),
 
     path(
-        'admin/',
-        admin.site.urls
+        "admin/",
+        admin.site.urls,
     ),
 
     path(
-        'accounts/',
-        include('accounts.urls')
+        "accounts/",
+        include("accounts.urls"),
     ),
 
     path(
-        'employees/',
-        include('employees.urls')
+        "employees/",
+        include("employees.urls"),
     ),
 
     path(
-       'departments/',
-        include('departments.urls')
+        "departments/",
+        include("departments.urls"),
     ),
 
     path(
-        'api/',
-        include('api.urls')
+        "api/",
+        include("api.urls"),
     ),
+
+    path(
+        "api/v1/documents/",
+        include("documents.urls"),
+    ),
+
 ]
 
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT
+        document_root=settings.MEDIA_ROOT,
     )

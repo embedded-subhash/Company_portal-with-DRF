@@ -1,6 +1,10 @@
+import uuid
+
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -50,6 +54,33 @@ class UserManager(BaseUserManager):
             password=password,
             **extra_fields
         )
+
+
+class PasswordResetToken(models.Model):
+    EXPIRY_MINUTES = 15
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="password_reset_tokens",
+    )
+    token = models.CharField(max_length=64, unique=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    def is_valid(self):
+        if self.used_at is not None:
+            return False
+        return timezone.now() < self.created_at + timezone.timedelta(minutes=self.EXPIRY_MINUTES)
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = uuid.uuid4().hex
+        return super().save(*args, **kwargs)
+
+    def mark_used(self):
+        self.used_at = timezone.now()
+        self.save(update_fields=["used_at"])
 
 
 class User(AbstractUser):

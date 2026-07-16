@@ -1,20 +1,7 @@
-from django.urls import path
-from .views import (
-    DepartmentListView,
-    DepartmentCreateView,
-)
+from rest_framework.routers import DefaultRouter
+from employees.views import DepartmentViewSet
 
-urlpatterns = [
+router = DefaultRouter()
+router.register("", DepartmentViewSet, basename="department")
 
-    path(
-        '',
-        DepartmentListView.as_view(),
-        name='department_list'
-    ),
-
-    path(
-        'create/',
-        DepartmentCreateView.as_view(),
-        name='department_create'
-    ),
-]
+urlpatterns = router.urls

@@ -15,9 +15,24 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_URL = 'static/'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+ALLOWED_IMAGE_EXTENSIONS = [
+    ".jpg",
+    ".jpeg",
+    ".png",
+]
+
+ALLOWED_DOCUMENT_EXTENSIONS = [
+    ".pdf",
+]
+
+MAX_IMAGE_UPLOAD_SIZE_MB = 5
+MAX_DOCUMENT_UPLOAD_SIZE_MB = 5
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -44,6 +59,7 @@ INSTALLED_APPS = [
     'accounts',
     'rest_framework',
     'logs.apps.LogsConfig',
+    'documents.apps.DocumentsConfig',
 ]
 
 REST_FRAMEWORK = {
