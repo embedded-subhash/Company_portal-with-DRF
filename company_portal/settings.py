@@ -58,8 +58,10 @@ INSTALLED_APPS = [
     'departments.apps.DepartmentsConfig',  
     'accounts',
     'rest_framework',
+    'rest_framework_simplejwt',
     'logs.apps.LogsConfig',
     'documents.apps.DocumentsConfig',
+    'reports',
 ]
 
 REST_FRAMEWORK = {
